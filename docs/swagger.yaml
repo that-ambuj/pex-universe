@@ -1,13 +1,41 @@
 basePath: /
 definitions:
+  model.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.UserLoginDto:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      password:
+        example: avEryStrongPass@93
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
   model.UserSignUpDto:
     properties:
       email:
         example: john@example.com
         type: string
       name:
+        example: John Doe
         type: string
       password:
+        example: avEryStrongPass@93
         minLength: 8
         type: string
     required:
@@ -50,6 +78,26 @@ paths:
       summary: Hello World
       tags:
       - default
+  /v1/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserLoginDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+      tags:
+      - auth
   /v1/signup:
     post:
       consumes:
