@@ -1,0 +1,69 @@
+basePath: /
+definitions:
+  model.UserSignUpDto:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  server.Hello:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: Pex Universe API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Hello'
+      summary: Database Health Indicator
+      tags:
+      - default
+  /hello:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Hello'
+      summary: Hello World
+      tags:
+      - default
+  /v1/signup:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Sign Up Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserSignUpDto'
+      produces:
+      - application/json
+      responses: {}
+      tags:
+      - auth
+swagger: "2.0"
