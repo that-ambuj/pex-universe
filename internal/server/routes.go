@@ -3,8 +3,10 @@ package server
 import (
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/gofiber/swagger"
 	_ "pex-universe/docs"
+	"pex-universe/internal/database"
+
+	"github.com/gofiber/swagger"
 )
 
 func (s *FiberServer) RegisterFiberRoutes() {
@@ -42,5 +44,5 @@ func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
 //	@Success	200	{object}	Hello
 //	@Router		/health [get]
 func (s *FiberServer) healthHandler(c *fiber.Ctx) error {
-	return c.JSON(s.db.Health())
+	return c.JSON(database.SqlxHealth(s.db))
 }
