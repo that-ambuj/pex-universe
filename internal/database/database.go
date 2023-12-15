@@ -12,14 +12,6 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type Service interface {
-	Health() map[string]string
-}
-
-type service struct {
-	db *sqlx.DB
-}
-
 var (
 	dbname   = os.Getenv("DB_DATABASE")
 	password = os.Getenv("DB_PASSWORD")
@@ -28,9 +20,9 @@ var (
 	host     = os.Getenv("DB_HOST")
 )
 
-func New() Service {
+func New() *sqlx.DB {
 	// Opening a driver typically will not attempt to connect to the database.
-	db, err := sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, dbname))
+	db, err := sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", username, password, host, port, dbname))
 	if err != nil {
 		// This will not be a connection error, but a DSN parse error or
 		// another initialization error.
@@ -40,15 +32,14 @@ func New() Service {
 	db.SetMaxIdleConns(50)
 	db.SetMaxOpenConns(50)
 
-	s := &service{db: db}
-	return s
+	return db
 }
 
-func (s *service) Health() map[string]string {
+func SqlxHealth(d *sqlx.DB) map[string]string {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	err := s.db.PingContext(ctx)
+	err := d.PingContext(ctx)
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("db down: %v", err))
 	}
