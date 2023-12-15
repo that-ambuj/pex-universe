@@ -5,14 +5,19 @@ import (
 	"pex-universe/internal/database"
 	"strings"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
+	"github.com/gofiber/fiber/v2/middleware/session"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/jmoiron/sqlx"
 )
 
 type FiberServer struct {
 	*fiber.App
-	db database.Service
-	v  *validator.Validate
+	db    *sqlx.DB
+	v     *validator.Validate
+	store *session.Store
 }
 
 type ValidationErrorResponse struct {
@@ -37,6 +42,8 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 			Message: t.Error(),
 		})
 	default:
+		log.Error(err.Error())
+
 		return c.Status(500).JSON(ErrorResp{
 			Success: false,
 			Status:  500,
@@ -47,12 +54,25 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 }
 
 func New() *FiberServer {
+	sessionConfig := session.ConfigDefault
+
+	sessionConfig.CookieHTTPOnly = true
+	sessionConfig.CookieSecure = true
+	sessionConfig.CookieSameSite = "Strict"
+
+	// TODO: Set CookieDomain to deployed URL for security
+	//sessionConfig.CookieDomain = ""
+
+	// TODO: Use Redis for storage
+	// sessionConfig.Storage = memory
+
 	server := &FiberServer{
 		App: fiber.New(fiber.Config{
 			ErrorHandler: ErrorHandler,
 		}),
-		db: database.New(),
-		v:  validator.New(),
+		db:    database.New(),
+		v:     validator.New(),
+		store: session.New(sessionConfig),
 	}
 
 	return server
