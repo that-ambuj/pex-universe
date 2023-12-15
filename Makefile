@@ -56,8 +56,7 @@ watch:
 	    fi; \
 	fi
 
-install-bins:
-	@echo "Installing SQLC binary"
-	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+swagger:
+	@swag init --parseInternal -g cmd/api/main.go
 
-.PHONY: all build run test clean install-bins
+.PHONY: all build run test clean swagger
