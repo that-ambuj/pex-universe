@@ -57,7 +57,7 @@ watch:
 	fi
 
 swagger:
-	@if command -v air > /dev/null; then \
+	@if command -v swag > /dev/null; then \
 		swag init --parseInternal -g cmd/api/main.go; \
 	    echo "Building Swagger docs...";\
 	else \

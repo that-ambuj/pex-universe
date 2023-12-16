@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/csrf"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -16,8 +15,7 @@ var (
 )
 
 // @title		Pex Universe API
-// @version	1.0
-// @host		localhost:8080
+// @version		1.0
 // @BasePath	/
 func main() {
 	server := server.New()
@@ -25,8 +23,6 @@ func main() {
 	if env != "production" {
 		server.App.Use(cors.New())
 	}
-
-	server.App.Use(csrf.New())
 
 	server.RegisterFiberRoutes()
 
