@@ -57,6 +57,19 @@ watch:
 	fi
 
 swagger:
-	@swag init --parseInternal -g cmd/api/main.go
+	@if command -v air > /dev/null; then \
+		swag init --parseInternal -g cmd/api/main.go; \
+	    echo "Building Swagger docs...";\
+	else \
+	    read -p "Go's binary 'swag' is not installed on your machine. Do you want to install it? [Y/n] " choice; \
+	    if [ "$$choice" != "n" ] && [ "$$choice" != "N" ]; then \
+	        go install github.com/swaggo/swag/cmd/swag@latest; \
+			swag init --parseInternal -g cmd/api/main.go; \
+		    echo "Building Swagger docs...";\
+	    else \
+	        echo "You chose not to install air. Exiting..."; \
+	        exit 1; \
+	    fi; \
+	fi
 
 .PHONY: all build run test clean swagger
