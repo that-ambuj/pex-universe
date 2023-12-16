@@ -35,6 +35,8 @@ type ErrorResp struct {
 }
 
 func ErrorHandler(c *fiber.Ctx, err error) error {
+	log.Error(err)
+
 	switch t := err.(type) {
 	case *fiber.Error:
 		return c.Status(t.Code).JSON(ErrorResp{
@@ -43,8 +45,6 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 			Message: t.Error(),
 		})
 	default:
-		log.Error(err.Error())
-
 		return c.Status(500).JSON(ErrorResp{
 			Success: false,
 			Status:  500,
