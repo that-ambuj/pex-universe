@@ -67,10 +67,20 @@ func New() *FiberServer {
 	// TODO: Use Redis for storage
 	sessionConfig.Storage = sqlite3.New()
 
+	app := fiber.New(fiber.Config{
+		ErrorHandler: ErrorHandler,
+	})
+
+	app.Hooks().OnRoute(func(r fiber.Route) error {
+		if r.Method != "HEAD" && r.Path != "/" {
+			fmt.Printf("Mapped Route: [%s] %s\n", r.Method, r.Path)
+		}
+
+		return nil
+	})
+
 	server := &FiberServer{
-		App: fiber.New(fiber.Config{
-			ErrorHandler: ErrorHandler,
-		}),
+		App:   app,
 		db:    database.New(),
 		v:     validator.New(),
 		store: session.New(sessionConfig),
