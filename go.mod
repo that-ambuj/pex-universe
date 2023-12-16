@@ -21,6 +21,7 @@ require (
 	github.com/gofiber/swagger v0.1.14 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mattn/go-sqlite3 v1.14.18 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
 	github.com/swaggo/swag v1.16.2 // indirect
 	golang.org/x/tools v0.16.1 // indirect
@@ -35,6 +36,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.16.0 // indirect
+	github.com/gofiber/storage/sqlite3/v2 v2.1.0
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
