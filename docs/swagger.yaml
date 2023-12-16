@@ -19,7 +19,7 @@ definitions:
         example: john@example.com
         type: string
       password:
-        example: avEryStrongPass@93
+        example: Very Strong Password
         minLength: 8
         type: string
     required:
@@ -47,6 +47,14 @@ definitions:
     properties:
       message:
         type: string
+    type: object
+  server.ProfileUpdateDto:
+    properties:
+      name:
+        example: John Doe
+        type: string
+    required:
+    - name
     type: object
 host: localhost:8080
 info:
@@ -98,6 +106,42 @@ paths:
             $ref: '#/definitions/model.User'
       tags:
       - auth
+  /v1/logout:
+    post:
+      responses: {}
+      summary: Log out of the current session
+      tags:
+      - auth
+  /v1/profile:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+      summary: Get Profile Info
+      tags:
+      - profile
+    put:
+      parameters:
+      - description: Profile Update Dto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/server.ProfileUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.User'
+      summary: Update Profile
+      tags:
+      - profile
   /v1/signup:
     post:
       consumes:
@@ -111,7 +155,11 @@ paths:
           $ref: '#/definitions/model.UserSignUpDto'
       produces:
       - application/json
-      responses: {}
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.User'
       tags:
       - auth
 swagger: "2.0"
