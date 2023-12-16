@@ -7,7 +7,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/google/uuid"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,6 +16,7 @@ func (s *FiberServer) RegisterAuthRoutes() {
 
 	v1.Post("/signup", s.signupPost)
 	v1.Post("/login", s.loginPost)
+	v1.Post("/logout", s.logoutPost)
 }
 
 // signupPost godoc
@@ -24,7 +24,8 @@ func (s *FiberServer) RegisterAuthRoutes() {
 //	@Tags		auth
 //	@Accept		json
 //	@Produce	json
-//	@Param		request	body	model.UserSignUpDto	true	"Sign Up Data"
+//	@Param		request	body		model.UserSignUpDto	true	"Sign Up Data"
+//	@Success	201		{object}	model.User
 //	@Router		/v1/signup [post]
 func (s *FiberServer) signupPost(c *fiber.Ctx) error {
 	u := new(model.UserSignUpDto)
@@ -80,7 +81,7 @@ func (s *FiberServer) signupPost(c *fiber.Ctx) error {
 		return fiber.NewError(400, err.Error())
 	}
 
-	return c.JSON(newUser)
+	return c.Status(fiber.StatusCreated).JSON(newUser)
 }
 
 // loginPost godoc
@@ -118,23 +119,41 @@ func (s *FiberServer) loginPost(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.ErrUnauthorized.Code, "Wrong Password")
 	}
 
-	sess := new(session.Session)
+	var sess *session.Session
 
 	sess, err = s.store.Get(c)
 	if err != nil {
 		return err
 	}
 
-	newToken := uuid.NewString()
+	sess.Regenerate()
+	defer sess.Save()
 
-	sess.Set("r_token", newToken)
+	newToken := sess.ID()
 
 	_, err = s.db.Exec(`UPDATE users SET remember_token = ? WHERE id = ?;`, newToken, user.Id)
 	if err != nil {
 		return err
 	}
 
-	sess.Save()
-
 	return c.JSON(user)
+}
+
+// loginPost godoc
+//
+//	@Tags		auth
+//	@Summary	Log out of the current session
+//	@Router		/v1/logout [post]
+func (s *FiberServer) logoutPost(c *fiber.Ctx) error {
+	sess, err := s.store.Get(c)
+	if err != nil {
+		return err
+	}
+
+	s.db.Exec(`UPDATE users SET remember_token = 'NULL' WHERE remember_token = ?;`, sess.ID())
+
+	sess.Destroy()
+	// defer sess.Save()
+
+	return c.SendStatus(fiber.StatusNoContent)
 }
