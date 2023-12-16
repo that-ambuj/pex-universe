@@ -16,7 +16,7 @@ func TestHandler(t *testing.T) {
 	// Define a route in the Fiber app
 	app.Get("/", s.HelloWorldHandler)
 	// Create a test HTTP request
-	req, err := http.NewRequest("GET", "/", nil)
+	req, err := http.NewRequest("GET", "/hello", nil)
 	if err != nil {
 		t.Fatalf("error creating request. Err: %v", err)
 	}
