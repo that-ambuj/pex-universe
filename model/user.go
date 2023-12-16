@@ -18,7 +18,7 @@ type (
 
 	UserLoginDto struct {
 		Email    string `validate:"required,email" example:"john@example.com"`
-		Password string `validate:"required,min=8" example:"avEryStrongPass@93"`
+		Password string `validate:"required,min=8" example:"Very Strong Password"`
 	}
 
 	UserSignUpDto struct {
