@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/gofiber/storage/sqlite3/v2"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
@@ -64,7 +65,7 @@ func New() *FiberServer {
 	//sessionConfig.CookieDomain = ""
 
 	// TODO: Use Redis for storage
-	// sessionConfig.Storage = memory
+	sessionConfig.Storage = sqlite3.New()
 
 	server := &FiberServer{
 		App: fiber.New(fiber.Config{
