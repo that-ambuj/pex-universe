@@ -19,7 +19,7 @@ func (s *FiberServer) RegisterFiberRoutes() {
 
 	s.RegisterAuthRoutes()
 
-	s.App.Use(s.UserAuthMiddleware)
+	s.App.Use("/v1/*", s.UserAuthMiddleware)
 
 	s.RegisterProfileRoutes()
 }
@@ -41,7 +41,7 @@ func (s *FiberServer) UserAuthMiddleware(c *fiber.Ctx) error {
 
 	err = s.db.Get(user, `SELECT * FROM users WHERE remember_token = ?`, token)
 	if err != nil {
-		return fiber.NewError(400, "User Token Expired")
+		return fiber.NewError(fiber.StatusUnauthorized, "User Token Expired")
 	}
 
 	c.Locals("user", user)
