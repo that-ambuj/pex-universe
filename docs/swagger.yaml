@@ -1,7 +1,66 @@
 basePath: /
 definitions:
+  model.Address:
+    properties:
+      city:
+        type: string
+      company:
+        type: string
+      country:
+        $ref: '#/definitions/model.Country'
+      createdAt:
+        type: string
+      email:
+        type: string
+      ext:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      phone:
+        type: string
+      state:
+        $ref: '#/definitions/model.State'
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      updatedAt:
+        type: string
+      verified:
+        type: boolean
+      zip:
+        type: string
+    type: object
+  model.Country:
+    properties:
+      displayName:
+        type: string
+      name:
+        type: string
+      position:
+        type: integer
+      ppCode:
+        type: string
+    type: object
+  model.State:
+    properties:
+      fullName:
+        type: string
+      info:
+        type: string
+      name:
+        type: string
+      tax:
+        type: number
+    type: object
   model.User:
     properties:
+      addresses:
+        items:
+          $ref: '#/definitions/model.Address'
+        type: array
       created_at:
         type: string
       email:
@@ -56,7 +115,6 @@ definitions:
     required:
     - name
     type: object
-host: localhost:8080
 info:
   contact: {}
   title: Pex Universe API
