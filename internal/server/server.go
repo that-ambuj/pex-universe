@@ -2,16 +2,19 @@ package server
 
 import (
 	"fmt"
-	"pex-universe/internal/database"
 	"strings"
+
+	"pex-universe/internal/database"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/gofiber/storage/sqlite3/v2"
+	"github.com/iancoleman/strcase"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/storage/sqlite3/v2"
 	"github.com/jmoiron/sqlx"
+	json "github.com/mixcode/golib-json-snake"
 )
 
 type FiberServer struct {
@@ -69,6 +72,8 @@ func New() *FiberServer {
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: ErrorHandler,
+		JSONEncoder:  json.MarshalSnakeCase,
+		JSONDecoder:  json.UnmarshalSnakeCase,
 	})
 
 	app.Hooks().OnRoute(func(r fiber.Route) error {
@@ -79,9 +84,12 @@ func New() *FiberServer {
 		return nil
 	})
 
+	db := database.New()
+	db.MapperFunc(strcase.ToSnake)
+
 	server := &FiberServer{
 		App:   app,
-		db:    database.New(),
+		db:    db,
 		v:     validator.New(),
 		store: session.New(sessionConfig),
 	}
