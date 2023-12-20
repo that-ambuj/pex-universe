@@ -1,6 +1,8 @@
 package server
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/gofiber/fiber/v2/middleware/session"
 
@@ -43,6 +45,9 @@ func (s *FiberServer) UserAuthMiddleware(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusUnauthorized, "User Token Expired")
 	}
+
+	sess.SetExpiry(24 * time.Hour)
+	sess.Save()
 
 	c.Locals("user", user)
 	return c.Next()

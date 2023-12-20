@@ -106,7 +106,7 @@ func (s *FiberServer) ValidateStruct(data interface{}) error {
 		for _, err := range errs.(validator.ValidationErrors) {
 			errMsgs = append(errMsgs, fmt.Sprintf(
 				"[%s]: '%v' | Needs to implement '%s' (param: '%s')",
-				err.StructField(),
+				err.Field(),
 				err.Value(),
 				err.Tag(),
 				err.Param(),
