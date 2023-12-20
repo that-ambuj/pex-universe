@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"pex-universe/internal/server"
 	"strconv"
@@ -12,6 +13,9 @@ import (
 
 var (
 	env = os.Getenv("APP_ENV")
+
+	certfile = os.Getenv("CERT_FILE")
+	certkey  = os.Getenv("CERT_KEY")
 )
 
 // @title		Pex Universe API
@@ -19,16 +23,20 @@ var (
 // @BasePath	/
 func main() {
 	server := server.New()
-
-	if env != "production" {
-		server.App.Use(cors.New())
-	}
+	server.App.Use(cors.New())
 
 	server.RegisterFiberRoutes()
 
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	err := server.Listen(fmt.Sprintf(":%d", port))
+
+	var err error
+	if env == "production" {
+		err = server.ListenTLS(":443", certfile, certkey)
+	} else {
+		err = server.Listen(fmt.Sprintf(":%d", port))
+	}
+
 	if err != nil {
-		panic("cannot start server")
+		log.Panic(err)
 	}
 }
