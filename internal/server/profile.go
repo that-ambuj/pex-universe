@@ -1,7 +1,6 @@
 package server
 
 import (
-	"database/sql"
 	"pex-universe/model"
 
 	"github.com/gofiber/fiber/v2"

@@ -153,7 +153,7 @@ func (s *FiberServer) logoutPost(c *fiber.Ctx) error {
 	s.db.Exec(`UPDATE users SET remember_token = 'NULL' WHERE remember_token = ?;`, sess.ID())
 
 	sess.Destroy()
-	// defer sess.Save()
+	defer sess.Save()
 
 	return c.SendStatus(fiber.StatusNoContent)
 }
