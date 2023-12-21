@@ -199,6 +199,9 @@ const docTemplate = `{
                 "firstName": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "lastName": {
                     "type": "string"
                 },
