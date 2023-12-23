@@ -11,6 +11,11 @@ func (s *FiberServer) RegisterProfileRoutes() {
 
 	v1.Get("/profile", s.profileGet)
 	v1.Put("/profile", s.profilePut)
+
+	v1.Get("/profile/addresses", s.addressGet)
+	v1.Get("/profile/addresses/:id", s.addressByIdGet)
+	v1.Post("/profile/addresses", s.addressPost)
+	v1.Put("/profile/addresses/:id", s.addressByIdPut)
 }
 
 type ProfileUpdateDto struct {
@@ -26,12 +31,6 @@ type ProfileUpdateDto struct {
 //	@Router		/v1/profile [get]
 func (s *FiberServer) profileGet(c *fiber.Ctx) error {
 	user := c.Locals("user").(*model.User)
-
-	if addrs, err := model.FindAddressesByUserId(s.db.DB, user.Id); err == nil {
-		user.Addresses = addrs
-	} else {
-		return err
-	}
 
 	return c.JSON(user)
 }
@@ -70,4 +69,69 @@ func (s *FiberServer) profilePut(c *fiber.Ctx) error {
 	s.db.Get(newUser, `SELECT * FROM users WHERE id = ?;`, user.Id)
 
 	return c.Status(fiber.StatusCreated).JSON(newUser)
+}
+
+// addressGet
+//
+//	@Summary	Get List of Addresses for the current user
+//	@Tags		profile
+//	@Produce	json
+//	@Success	200	{array}	model.Address
+//	@Router		/v1/profile/addresses [get]
+func (s *FiberServer) addressGet(c *fiber.Ctx) error {
+	user := c.Locals("user").(*model.User)
+
+	var err error
+
+	addresses, err := model.FindAddressesByUserId(s.db.DB, user.Id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(addresses)
+}
+
+// addressPost
+//
+//	@Summary 	Create a new `Address` for the current `User`
+//	@Tags		profile
+//	@Produce	json
+//	@Success	200	{array}	model.Address
+//	@Router		/v1/profile/addresses [post]
+func (s *FiberServer) addressPost(c *fiber.Ctx) error {
+	user := c.Locals("user").(*model.User)
+
+	dto := new(model.AddressCreateDto)
+
+	err := c.BodyParser(dto)
+	if err != nil {
+		return fiber.NewError(400, err.Error())
+	}
+
+	err = s.ValidateStruct(dto)
+	if err != nil {
+		return err
+	}
+
+	dto.UserId = user.Id
+
+	err = dto.InsertNew(s.db.DB)
+	if err != nil {
+		return err
+	}
+
+	addrs, err := model.FindAddressesByUserId(s.db.DB, user.Id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(addrs)
+}
+
+func (s *FiberServer) addressByIdGet(c *fiber.Ctx) error {
+	return fiber.ErrNotImplemented
+}
+
+func (s *FiberServer) addressByIdPut(c *fiber.Ctx) error {
+	return fiber.ErrNotImplemented
 }
