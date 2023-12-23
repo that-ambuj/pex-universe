@@ -27,5 +27,6 @@ tmp/
 
 # .env file
 .env
+.env.local
 
 main
