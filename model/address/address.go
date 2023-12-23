@@ -1,9 +1,12 @@
-package model
+package address
 
 import (
 	"database/sql"
+	"errors"
 	"pex-universe/types"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type (
@@ -22,12 +25,8 @@ type (
 		Phone          string
 		Ext            string
 		Email          string
-		// Foreign Keys
-		CountryId sql.NullInt64 `db:"country_id" json:"-"`
-		StateId   sql.NullInt64 `db:"state_id" json:"-"`
-		UserId    sql.NullInt64 `db:"user_id" json:"-"`
-		State     *State
-		Country   *Country
+		State          *State
+		Country        *Country
 	}
 
 	State struct {
@@ -52,7 +51,15 @@ type (
 	}
 )
 
-func FindAddressesByUserId(db *sql.DB, userId uint64) ([]*Address, error) {
+type AddressCreateDto struct {
+	Address
+	// Foriegn Keys
+	CountryId uint64
+	StateId   uint64
+	UserId    uint64
+}
+
+func FindManyByUserId(db *sql.DB, userId uint64) ([]*Address, error) {
 	addrs := []*Address{}
 
 	query := `
@@ -133,4 +140,64 @@ WHERE a.user_id = ?;
 	}
 
 	return addrs, nil
+}
+
+func (a *AddressCreateDto) CreateNew(db *sql.DB) error {
+	if a.UserId < 1 {
+		return errors.New("UserId not set.")
+	}
+
+	if a.StateId < 1 {
+		return fiber.NewError(400, "Please set state_id.")
+	}
+	if a.CountryId < 1 {
+		return fiber.NewError(400, "Please set country_id.")
+	}
+
+	_, err := db.Exec(`
+	INSERT INTO addresses(
+		verified,
+		first_name,
+		last_name,
+		company,
+		street_address,
+		street_address2,
+		city,
+		zip,
+		phone,
+		ext,
+		email,
+
+		user_id,
+		country_id,
+		state_id,
+
+		created_at,
+		updated_at
+	) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? );`,
+		a.Verified,
+		a.FirstName,
+		a.LastName,
+		a.Company,
+		a.StreetAddress1,
+		a.StreetAddress2,
+		a.City,
+		a.Zip,
+		a.Phone,
+		a.Ext,
+		a.Email,
+
+		a.UserId,
+		a.CountryId,
+		a.StateId,
+
+		time.Now(),
+		time.Now(),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

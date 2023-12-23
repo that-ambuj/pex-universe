@@ -1,7 +1,8 @@
 package server
 
 import (
-	"pex-universe/model"
+	"pex-universe/model/address"
+	"pex-universe/model/user"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -27,10 +28,10 @@ type ProfileUpdateDto struct {
 //	@Summary	Get Profile Info
 //	@Tags		profile
 //	@Produce	json
-//	@Success	200	{object}	model.User
+//	@Success	200	{object}	user.User
 //	@Router		/v1/profile [get]
 func (s *FiberServer) profileGet(c *fiber.Ctx) error {
-	user := c.Locals("user").(*model.User)
+	user := c.Locals("user").(*user.User)
 
 	return c.JSON(user)
 }
@@ -41,7 +42,7 @@ func (s *FiberServer) profileGet(c *fiber.Ctx) error {
 //	@Tags		profile
 //	@Produce	json
 //	@Param		request	body		ProfileUpdateDto	true	"Profile Update Dto"
-//	@Success	201		{object}	model.User
+//	@Success	201		{object}	user.User
 //	@Router		/v1/profile [put]
 func (s *FiberServer) profilePut(c *fiber.Ctx) error {
 	dto := new(ProfileUpdateDto)
@@ -58,15 +59,15 @@ func (s *FiberServer) profilePut(c *fiber.Ctx) error {
 		return err
 	}
 
-	user := c.Locals("user").(*model.User)
+	u := c.Locals("user").(*user.User)
 
-	_, err = s.db.Exec(`UPDATE users SET name = ? WHERE id = ?;`, dto.Name, user.Id)
+	_, err = s.db.Exec(`UPDATE users SET name = ? WHERE id = ?;`, dto.Name, u.Id)
 	if err != nil {
 		return err
 	}
 
-	newUser := new(model.User)
-	s.db.Get(newUser, `SELECT * FROM users WHERE id = ?;`, user.Id)
+	newUser := new(user.User)
+	s.db.Get(newUser, `SELECT * FROM users WHERE id = ?;`, u.Id)
 
 	return c.Status(fiber.StatusCreated).JSON(newUser)
 }
@@ -76,14 +77,14 @@ func (s *FiberServer) profilePut(c *fiber.Ctx) error {
 //	@Summary	Get List of Addresses for the current user
 //	@Tags		profile
 //	@Produce	json
-//	@Success	200	{array}	model.Address
+//	@Success	200	{array}	address.Address
 //	@Router		/v1/profile/addresses [get]
 func (s *FiberServer) addressGet(c *fiber.Ctx) error {
-	user := c.Locals("user").(*model.User)
+	user := c.Locals("user").(*user.User)
 
 	var err error
 
-	addresses, err := model.FindAddressesByUserId(s.db.DB, user.Id)
+	addresses, err := address.FindManyByUserId(s.db.DB, user.Id)
 	if err != nil {
 		return err
 	}
@@ -96,12 +97,12 @@ func (s *FiberServer) addressGet(c *fiber.Ctx) error {
 //	@Summary 	Create a new `Address` for the current `User`
 //	@Tags		profile
 //	@Produce	json
-//	@Success	200	{array}	model.Address
+//	@Success	200	{array}	address.Address
 //	@Router		/v1/profile/addresses [post]
 func (s *FiberServer) addressPost(c *fiber.Ctx) error {
-	user := c.Locals("user").(*model.User)
+	user := c.Locals("user").(*user.User)
 
-	dto := new(model.AddressCreateDto)
+	dto := new(address.AddressCreateDto)
 
 	err := c.BodyParser(dto)
 	if err != nil {
@@ -115,12 +116,12 @@ func (s *FiberServer) addressPost(c *fiber.Ctx) error {
 
 	dto.UserId = user.Id
 
-	err = dto.InsertNew(s.db.DB)
+	err = dto.CreateNew(s.db.DB)
 	if err != nil {
 		return err
 	}
 
-	addrs, err := model.FindAddressesByUserId(s.db.DB, user.Id)
+	addrs, err := address.FindManyByUserId(s.db.DB, user.Id)
 	if err != nil {
 		return err
 	}

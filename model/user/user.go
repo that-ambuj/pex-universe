@@ -1,17 +1,19 @@
-package model
+package user
 
 import (
 	"database/sql"
+	"pex-universe/model"
+	"pex-universe/model/address"
 )
 
 type (
 	User struct {
-		Name          string         `db:"name" json:"name"`
-		Email         string         `db:"email" json:"email"`
-		Password      string         `db:"password" json:"-"`
-		RememberToken sql.NullString `db:"remember_token" json:"-"`
-		Addresses     []*Address     `json:"addresses"`
-		AutoInc
+		Name          string             `db:"name" json:"name"`
+		Email         string             `db:"email" json:"email"`
+		Password      string             `db:"password" json:"-"`
+		RememberToken sql.NullString     `db:"remember_token" json:"-"`
+		Addresses     []*address.Address `json:"addresses"`
+		model.AutoInc
 	}
 
 	UserLoginDto struct {

@@ -2,8 +2,9 @@ package server
 
 import (
 	"fmt"
-	"pex-universe/model"
 	"time"
+
+	"pex-universe/model/user"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -24,11 +25,11 @@ func (s *FiberServer) RegisterAuthRoutes() {
 //	@Tags		auth
 //	@Accept		json
 //	@Produce	json
-//	@Param		request	body		model.UserSignUpDto	true	"Sign Up Data"
-//	@Success	201		{object}	model.User
+//	@Param		request	body		user.UserSignUpDto	true	"Sign Up Data"
+//	@Success	201		{object}	user.User
 //	@Router		/v1/signup [post]
 func (s *FiberServer) signupPost(c *fiber.Ctx) error {
-	u := new(model.UserSignUpDto)
+	u := new(user.UserSignUpDto)
 
 	var err error
 
@@ -74,7 +75,7 @@ func (s *FiberServer) signupPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	newUser := new(model.User)
+	newUser := new(user.User)
 
 	err = s.db.Get(newUser, `SELECT * FROM users WHERE email = ?`, u.Email)
 	if err != nil {
@@ -89,11 +90,11 @@ func (s *FiberServer) signupPost(c *fiber.Ctx) error {
 //	@Tags		auth
 //	@Accept		json
 //	@Produce	json
-//	@Param		request	body		model.UserLoginDto	true	"Login Data"
-//	@Success	200		{object}	model.User
+//	@Param		request	body		user.UserLoginDto	true	"Login Data"
+//	@Success	200		{object}	user.User
 //	@Router		/v1/login [post]
 func (s *FiberServer) loginPost(c *fiber.Ctx) error {
-	u := new(model.UserLoginDto)
+	u := new(user.UserLoginDto)
 
 	var err error
 
@@ -107,7 +108,7 @@ func (s *FiberServer) loginPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	user := new(model.User)
+	user := new(user.User)
 
 	err = s.db.Get(user, `SELECT * FROM users WHERE email = ?;`, u.Email)
 	if err != nil {

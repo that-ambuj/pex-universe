@@ -8,7 +8,7 @@ import (
 
 	_ "pex-universe/docs"
 	"pex-universe/internal/database"
-	"pex-universe/model"
+	"pex-universe/model/user"
 
 	"github.com/gofiber/swagger"
 )
@@ -39,9 +39,9 @@ func (s *FiberServer) UserAuthMiddleware(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.ErrUnauthorized.Code, "Invalid User Session")
 	}
 
-	user := new(model.User)
+	u := new(user.User)
 
-	err = s.db.Get(user, `SELECT * FROM users WHERE remember_token = ?`, token)
+	err = s.db.Get(u, `SELECT * FROM users WHERE remember_token = ?`, token)
 	if err != nil {
 		return fiber.NewError(fiber.StatusUnauthorized, "User Token Expired")
 	}
@@ -49,7 +49,7 @@ func (s *FiberServer) UserAuthMiddleware(c *fiber.Ctx) error {
 	sess.SetExpiry(24 * time.Hour)
 	sess.Save()
 
-	c.Locals("user", user)
+	c.Locals("user", u)
 	return c.Next()
 }
 
