@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"pex-universe/internal/database"
@@ -76,13 +77,17 @@ func New() *FiberServer {
 		JSONDecoder:  json.UnmarshalSnakeCase,
 	})
 
-	app.Hooks().OnRoute(func(r fiber.Route) error {
-		if r.Method != "HEAD" && r.Path != "/" {
-			fmt.Printf("Mapped Route: [%s] %s\n", r.Method, r.Path)
-		}
+	env := os.Getenv("APP_ENV")
 
-		return nil
-	})
+	if env != "test" {
+		app.Hooks().OnRoute(func(r fiber.Route) error {
+			if r.Method != "HEAD" && r.Path != "/" {
+				fmt.Printf("Mapped Route: [%s] %s\n", r.Method, r.Path)
+			}
+
+			return nil
+		})
+	}
 
 	db := database.New()
 	db.MapperFunc(strcase.ToSnake)
