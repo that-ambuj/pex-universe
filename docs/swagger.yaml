@@ -1,13 +1,13 @@
 basePath: /
 definitions:
-  model.Address:
+  address.Address:
     properties:
       city:
         type: string
       company:
         type: string
       country:
-        $ref: '#/definitions/model.Country'
+        $ref: '#/definitions/address.Country'
       createdAt:
         type: string
       email:
@@ -23,7 +23,7 @@ definitions:
       phone:
         type: string
       state:
-        $ref: '#/definitions/model.State'
+        $ref: '#/definitions/address.State'
       streetAddress1:
         type: string
       streetAddress2:
@@ -35,7 +35,7 @@ definitions:
       zip:
         type: string
     type: object
-  model.Country:
+  address.Country:
     properties:
       displayName:
         type: string
@@ -46,7 +46,7 @@ definitions:
       ppCode:
         type: string
     type: object
-  model.State:
+  address.State:
     properties:
       fullName:
         type: string
@@ -57,11 +57,35 @@ definitions:
       tax:
         type: number
     type: object
-  model.User:
+  server.AddressesResponse:
+    properties:
+      currentPage:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/address.Address'
+        type: array
+      totalPages:
+        type: integer
+    type: object
+  server.Hello:
+    properties:
+      message:
+        type: string
+    type: object
+  server.ProfileUpdateDto:
+    properties:
+      name:
+        example: John Doe
+        type: string
+    required:
+    - name
+    type: object
+  user.User:
     properties:
       addresses:
         items:
-          $ref: '#/definitions/model.Address'
+          $ref: '#/definitions/address.Address'
         type: array
       created_at:
         type: string
@@ -74,7 +98,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  model.UserLoginDto:
+  user.UserLoginDto:
     properties:
       email:
         example: john@example.com
@@ -87,7 +111,7 @@ definitions:
     - email
     - password
     type: object
-  model.UserSignUpDto:
+  user.UserSignUpDto:
     properties:
       email:
         example: john@example.com
@@ -103,19 +127,6 @@ definitions:
     - email
     - name
     - password
-    type: object
-  server.Hello:
-    properties:
-      message:
-        type: string
-    type: object
-  server.ProfileUpdateDto:
-    properties:
-      name:
-        example: John Doe
-        type: string
-    required:
-    - name
     type: object
 info:
   contact: {}
@@ -156,14 +167,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/model.UserLoginDto'
+          $ref: '#/definitions/user.UserLoginDto'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: '#/definitions/user.User'
       tags:
       - auth
   /v1/logout:
@@ -180,7 +191,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: '#/definitions/user.User'
       summary: Get Profile Info
       tags:
       - profile
@@ -198,8 +209,79 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: '#/definitions/user.User'
       summary: Update Profile
+      tags:
+      - profile
+  /v1/profile/addresses:
+    get:
+      description: Get List of `Address`es for the current `User`
+      parameters:
+      - default: 1
+        description: page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: limit of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/server.AddressesResponse'
+            type: array
+      tags:
+      - profile
+    post:
+      description: Create a new `Address` for the current `User`
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/address.Address'
+      tags:
+      - profile
+  /v1/profile/addresses/{id}:
+    get:
+      description: Get `Address` Info By Id
+      parameters:
+      - description: Address ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/address.Address'
+      tags:
+      - profile
+    put:
+      description: Update an `Address` by it's `ID`.
+      parameters:
+      - description: Address ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/address.Address'
       tags:
       - profile
   /v1/signup:
@@ -212,14 +294,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/model.UserSignUpDto'
+          $ref: '#/definitions/user.UserSignUpDto'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: '#/definitions/user.User'
       tags:
       - auth
 swagger: "2.0"

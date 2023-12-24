@@ -71,7 +71,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.UserLoginDto"
+                            "$ref": "#/definitions/user.UserLoginDto"
                         }
                     }
                 ],
@@ -79,7 +79,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/user.User"
                         }
                     }
                 }
@@ -107,7 +107,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/user.User"
                         }
                     }
                 }
@@ -135,7 +135,116 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/user.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/profile/addresses": {
+            "get": {
+                "description": "Get List of ` + "`" + `Address` + "`" + `es for the current ` + "`" + `User` + "`" + `",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "limit of results",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/server.AddressesResponse"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new ` + "`" + `Address` + "`" + ` for the current ` + "`" + `User` + "`" + `",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/address.Address"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/profile/addresses/{id}": {
+            "get": {
+                "description": "Get ` + "`" + `Address` + "`" + ` Info By Id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Address ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/address.Address"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an ` + "`" + `Address` + "`" + ` by it's ` + "`" + `ID` + "`" + `.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Address ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/address.Address"
                         }
                     }
                 }
@@ -159,7 +268,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.UserSignUpDto"
+                            "$ref": "#/definitions/user.UserSignUpDto"
                         }
                     }
                 ],
@@ -167,7 +276,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/user.User"
                         }
                     }
                 }
@@ -175,7 +284,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.Address": {
+        "address.Address": {
             "type": "object",
             "properties": {
                 "city": {
@@ -185,7 +294,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "country": {
-                    "$ref": "#/definitions/model.Country"
+                    "$ref": "#/definitions/address.Country"
                 },
                 "createdAt": {
                     "type": "string"
@@ -209,7 +318,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "state": {
-                    "$ref": "#/definitions/model.State"
+                    "$ref": "#/definitions/address.State"
                 },
                 "streetAddress1": {
                     "type": "string"
@@ -228,7 +337,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Country": {
+        "address.Country": {
             "type": "object",
             "properties": {
                 "displayName": {
@@ -245,7 +354,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.State": {
+        "address.State": {
             "type": "object",
             "properties": {
                 "fullName": {
@@ -262,70 +371,20 @@ const docTemplate = `{
                 }
             }
         },
-        "model.User": {
+        "server.AddressesResponse": {
             "type": "object",
             "properties": {
-                "addresses": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Address"
-                    }
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
+                "currentPage": {
                     "type": "integer"
                 },
-                "name": {
-                    "type": "string"
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/address.Address"
+                    }
                 },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.UserLoginDto": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john@example.com"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 8,
-                    "example": "Very Strong Password"
-                }
-            }
-        },
-        "model.UserSignUpDto": {
-            "type": "object",
-            "required": [
-                "email",
-                "name",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john@example.com"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "John Doe"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 8,
-                    "example": "avEryStrongPass@93"
+                "totalPages": {
+                    "type": "integer"
                 }
             }
         },
@@ -346,6 +405,73 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "John Doe"
+                }
+            }
+        },
+        "user.User": {
+            "type": "object",
+            "properties": {
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/address.Address"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.UserLoginDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "Very Strong Password"
+                }
+            }
+        },
+        "user.UserSignUpDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "avEryStrongPass@93"
                 }
             }
         }
