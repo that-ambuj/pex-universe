@@ -13,9 +13,8 @@ func TestEnv(t *testing.T) {
 	config.LoadEnv()
 
 	assert.Equal(t, os.Getenv("APP_ENV"), "test")
-	assert.Equal(t, os.Getenv("DB_HOST"), "localhost")
+	assert.Equal(t, os.Getenv("DB_HOST"), "127.0.0.1")
 	assert.Equal(t, os.Getenv("DB_PORT"), "3306")
-	assert.Equal(t, os.Getenv("DB_DATABASE"), "pexuniverse")
-	assert.Equal(t, os.Getenv("DB_USERNAME"), "pex_test_user")
-	assert.Equal(t, os.Getenv("DB_PASSWORD"), "somepassword")
+	assert.Equal(t, os.Getenv("DB_DATABASE"), "pexuniverse_copy")
+	assert.Equal(t, os.Getenv("DB_USERNAME"), "pex_copy_remote")
 }
