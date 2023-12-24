@@ -5,22 +5,24 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"pex-universe/internal/config"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/joho/godotenv/autoload"
-)
-
-var (
-	dbname   = os.Getenv("DB_DATABASE")
-	password = os.Getenv("DB_PASSWORD")
-	username = os.Getenv("DB_USERNAME")
-	port     = os.Getenv("DB_PORT")
-	host     = os.Getenv("DB_HOST")
 )
 
 func New() *sqlx.DB {
+	config.LoadEnv()
+
+	var (
+		dbname   = os.Getenv("DB_DATABASE")
+		password = os.Getenv("DB_PASSWORD")
+		username = os.Getenv("DB_USERNAME")
+		port     = os.Getenv("DB_PORT")
+		host     = os.Getenv("DB_HOST")
+	)
+
 	// Opening a driver typically will not attempt to connect to the database.
 	db, err := sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", username, password, host, port, dbname))
 	if err != nil {
