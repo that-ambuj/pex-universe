@@ -74,22 +74,37 @@ func (s *FiberServer) profilePut(c *fiber.Ctx) error {
 
 // addressGet
 //
-//	@Summary	Get List of Addresses for the current user
-//	@Tags		profile
-//	@Produce	json
-//	@Success	200	{array}	address.Address
-//	@Router		/v1/profile/addresses [get]
+//	@Description	Get List of `Address`es for the current `User`
+//	@Tags			profile
+//	@Produce		json
+//	@Param			page	query	int	false	"page number"		default(1)
+//	@Param			limit	query	int	false	"limit of results"	default(10)
+//	@Success		200		{array}	AddressesResponse
+//	@Router			/v1/profile/addresses [get]
 func (s *FiberServer) addressGet(c *fiber.Ctx) error {
 	user := c.Locals("user").(*user.User)
 
-	var err error
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
 
-	addresses, err := address.FindManyByUserId(s.db.DB, user.Id)
+	pagination := model.PaginationDto{
+		Page:  page,
+		Limit: limit,
+	}
+
+	addrs, err := address.FindManyByUserId(s.db, user.Id, pagination)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(addresses)
+	count, err := address.CountByUserId(s.db, user.Id)
+
+	return c.JSON(AddressesResponse{
+		Data:        addrs,
+		CurrentPage: page,
+		TotalPages:  int(math.Ceil(float64(count) / float64(limit))),
+	})
+}
 
 // addressByIdGet
 //
