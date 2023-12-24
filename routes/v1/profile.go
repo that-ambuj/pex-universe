@@ -1,4 +1,4 @@
-package server
+package routes
 
 import (
 	"math"
@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func (s *FiberServer) RegisterProfileRoutes() {
+func (s *Controller) RegisterProfileRoutes() {
 	v1 := s.App.Group("/v1")
 
 	v1.Get("/profile", s.profileGet)
@@ -33,7 +33,7 @@ type ProfileUpdateDto struct {
 //	@Produce	json
 //	@Success	200	{object}	user.User
 //	@Router		/v1/profile [get]
-func (s *FiberServer) profileGet(c *fiber.Ctx) error {
+func (s *Controller) profileGet(c *fiber.Ctx) error {
 	user := c.Locals("user").(*user.User)
 
 	return c.JSON(user)
@@ -47,7 +47,7 @@ func (s *FiberServer) profileGet(c *fiber.Ctx) error {
 //	@Param		request	body		ProfileUpdateDto	true	"Profile Update Dto"
 //	@Success	201		{object}	user.User
 //	@Router		/v1/profile [put]
-func (s *FiberServer) profilePut(c *fiber.Ctx) error {
+func (s *Controller) profilePut(c *fiber.Ctx) error {
 	dto := new(ProfileUpdateDto)
 
 	var err error
@@ -64,13 +64,13 @@ func (s *FiberServer) profilePut(c *fiber.Ctx) error {
 
 	u := c.Locals("user").(*user.User)
 
-	_, err = s.db.Exec(`UPDATE users SET name = ? WHERE id = ?;`, dto.Name, u.Id)
+	_, err = s.DB.Exec(`UPDATE users SET name = ? WHERE id = ?;`, dto.Name, u.Id)
 	if err != nil {
 		return err
 	}
 
 	newUser := new(user.User)
-	s.db.Get(newUser, `SELECT * FROM users WHERE id = ?;`, u.Id)
+	s.DB.Get(newUser, `SELECT * FROM users WHERE id = ?;`, u.Id)
 
 	return c.Status(fiber.StatusCreated).JSON(newUser)
 }
@@ -90,23 +90,23 @@ type AddressesResponse struct {
 //	@Param			limit	query	int	false	"limit of results"	default(10)
 //	@Success		200		{array}	AddressesResponse
 //	@Router			/v1/profile/addresses [get]
-func (s *FiberServer) addressGet(c *fiber.Ctx) error {
+func (s *Controller) addressGet(c *fiber.Ctx) error {
 	user := c.Locals("user").(*user.User)
 
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
 
-	pagination := model.PaginationDto{
+	pagination := &model.PaginationDto{
 		Page:  page,
 		Limit: limit,
 	}
 
-	addrs, err := address.FindManyByUserId(s.db, user.Id, pagination)
+	addrs, err := address.FindManyByUserId(s.DB, user.Id, pagination)
 	if err != nil {
 		return err
 	}
 
-	count, err := address.CountByUserId(s.db, user.Id)
+	count, err := address.CountByUserId(s.DB, user.Id)
 
 	return c.JSON(AddressesResponse{
 		Data:        addrs,
@@ -123,7 +123,7 @@ func (s *FiberServer) addressGet(c *fiber.Ctx) error {
 //	@Param			id							path		int	true	"Address ID"
 //	@Success		200							{object}	address.Address
 //	@Router			/v1/profile/addresses/{id} 	[get]
-func (s *FiberServer) addressByIdGet(c *fiber.Ctx) error {
+func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
 	u := c.Locals("user").(*user.User)
 
 	idStr := c.Params("id")
@@ -132,7 +132,7 @@ func (s *FiberServer) addressByIdGet(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	addr, err := address.FindById(s.db, uint64(id), u.Id)
+	addr, err := address.FindById(s.DB, uint64(id), u.Id)
 	if err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func (s *FiberServer) addressByIdGet(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Success		201	{object}	address.Address
 //	@Router			/v1/profile/addresses [post]
-func (s *FiberServer) addressPost(c *fiber.Ctx) error {
+func (s *Controller) addressPost(c *fiber.Ctx) error {
 	user := c.Locals("user").(*user.User)
 
 	dto := new(address.AddressCreateDto)
@@ -164,12 +164,12 @@ func (s *FiberServer) addressPost(c *fiber.Ctx) error {
 
 	dto.UserId = user.Id
 
-	lastId, err := dto.CreateNew(s.db)
+	lastId, err := dto.CreateNew(s.DB)
 	if err != nil {
 		return err
 	}
 
-	addr, err := address.FindById(s.db, uint64(lastId), user.Id)
+	addr, err := address.FindById(s.DB, uint64(lastId), user.Id)
 	if err != nil {
 		return err
 	}
@@ -177,6 +177,15 @@ func (s *FiberServer) addressPost(c *fiber.Ctx) error {
 	return c.Status(201).JSON(addr)
 }
 
-func (s *FiberServer) addressByIdPut(c *fiber.Ctx) error {
+// addressByIdPut
+//
+//	@Description	Update an `Address` by it's `ID`.
+//	@Tags			profile
+//	@Produce		json
+//	@Param			id	path		int	true	"Address ID"
+//	@Success		200	{object}	address.Address
+//	@Router			/v1/profile/addresses/{id} [put]
+func (s *Controller) addressByIdPut(c *fiber.Ctx) error {
+
 	return fiber.ErrNotImplemented
 }

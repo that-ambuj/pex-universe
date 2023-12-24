@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"pex-universe/internal/database"
 
@@ -20,9 +19,9 @@ import (
 
 type FiberServer struct {
 	*fiber.App
-	db    *sqlx.DB
-	v     *validator.Validate
-	store *session.Store
+	DB    *sqlx.DB
+	V     *validator.Validate
+	Store *session.Store
 }
 
 type ValidationErrorResponse struct {
@@ -66,7 +65,7 @@ func New() *FiberServer {
 	sessionConfig.CookieSameSite = "Strict"
 
 	// TODO: Set CookieDomain to deployed URL for security
-	//sessionConfig.CookieDomain = ""
+	// sessionConfig.CookieDomain = ""
 
 	// TODO: Use Redis for storage
 	sessionConfig.Storage = sqlite3.New()
@@ -94,35 +93,16 @@ func New() *FiberServer {
 
 	server := &FiberServer{
 		App:   app,
-		db:    db,
-		v:     validator.New(),
-		store: session.New(sessionConfig),
+		DB:    db,
+		V:     validator.New(),
+		Store: session.New(sessionConfig),
 	}
 
 	return server
 }
 
-func (s *FiberServer) ValidateStruct(data interface{}) error {
-	errs := s.v.Struct(data)
-
-	if errs != nil {
-		errMsgs := make([]string, 0)
-
-		for _, err := range errs.(validator.ValidationErrors) {
-			errMsgs = append(errMsgs, fmt.Sprintf(
-				"[%s]: '%v' | Needs to implement '%s' (param: '%s')",
-				err.Field(),
-				err.Value(),
-				err.Tag(),
-				err.Param(),
-			))
-		}
-
-		return &fiber.Error{
-			Code:    fiber.ErrBadRequest.Code,
-			Message: strings.Join(errMsgs, " and "),
-		}
-	}
-
-	return nil
+func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
+	return c.JSON(map[string]string{
+		"message": "Hello World",
+	})
 }

@@ -1,4 +1,4 @@
-package server
+package routes
 
 import (
 	"fmt"
@@ -12,12 +12,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *FiberServer) RegisterAuthRoutes() {
-	v1 := s.App.Group("/v1")
+func (c *Controller) RegisterAuthRoutes() {
+	v1 := c.App.Group("/v1")
 
-	v1.Post("/signup", s.signupPost)
-	v1.Post("/login", s.loginPost)
-	v1.Post("/logout", s.logoutPost)
+	v1.Post("/signup", c.signupPost)
+	v1.Post("/login", c.loginPost)
+	v1.Post("/logout", c.logoutPost)
 }
 
 // signupPost godoc
@@ -28,7 +28,7 @@ func (s *FiberServer) RegisterAuthRoutes() {
 //	@Param		request	body		user.UserSignUpDto	true	"Sign Up Data"
 //	@Success	201		{object}	user.User
 //	@Router		/v1/signup [post]
-func (s *FiberServer) signupPost(c *fiber.Ctx) error {
+func (s *Controller) signupPost(c *fiber.Ctx) error {
 	u := new(user.UserSignUpDto)
 
 	var err error
@@ -46,7 +46,7 @@ func (s *FiberServer) signupPost(c *fiber.Ctx) error {
 	count := 0
 
 	// Ignore errors here, only checking existense
-	s.db.QueryRow(`SELECT COUNT(*) as count FROM users WHERE email = ?`, u.Email).Scan(&count)
+	s.DB.QueryRow(`SELECT COUNT(*) as count FROM users WHERE email = ?`, u.Email).Scan(&count)
 
 	if count > 0 {
 		return &fiber.Error{
@@ -62,7 +62,7 @@ func (s *FiberServer) signupPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err = s.db.Exec(`
+	_, err = s.DB.Exec(`
 		INSERT INTO
 			users (name, email, password, created_at, updated_at)
 			VALUES (?, ?, ?, ?, ?);`,
@@ -77,7 +77,7 @@ func (s *FiberServer) signupPost(c *fiber.Ctx) error {
 
 	newUser := new(user.User)
 
-	err = s.db.Get(newUser, `SELECT * FROM users WHERE email = ?`, u.Email)
+	err = s.DB.Get(newUser, `SELECT * FROM users WHERE email = ?`, u.Email)
 	if err != nil {
 		return fiber.NewError(400, err.Error())
 	}
@@ -93,7 +93,7 @@ func (s *FiberServer) signupPost(c *fiber.Ctx) error {
 //	@Param		request	body		user.UserLoginDto	true	"Login Data"
 //	@Success	200		{object}	user.User
 //	@Router		/v1/login [post]
-func (s *FiberServer) loginPost(c *fiber.Ctx) error {
+func (s *Controller) loginPost(c *fiber.Ctx) error {
 	u := new(user.UserLoginDto)
 
 	var err error
@@ -110,7 +110,7 @@ func (s *FiberServer) loginPost(c *fiber.Ctx) error {
 
 	user := new(user.User)
 
-	err = s.db.Get(user, `SELECT * FROM users WHERE email = ?;`, u.Email)
+	err = s.DB.Get(user, `SELECT * FROM users WHERE email = ?;`, u.Email)
 	if err != nil {
 		return fiber.NewError(404, fmt.Sprintf("User with email `%s` was not found.", u.Email))
 	}
@@ -122,7 +122,7 @@ func (s *FiberServer) loginPost(c *fiber.Ctx) error {
 
 	var sess *session.Session
 
-	sess, err = s.store.Get(c)
+	sess, err = s.Store.Get(c)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (s *FiberServer) loginPost(c *fiber.Ctx) error {
 
 	newToken := sess.ID()
 
-	_, err = s.db.Exec(`UPDATE users SET remember_token = ? WHERE id = ?;`, newToken, user.Id)
+	_, err = s.DB.Exec(`UPDATE users SET remember_token = ? WHERE id = ?;`, newToken, user.Id)
 	if err != nil {
 		return err
 	}
@@ -145,13 +145,13 @@ func (s *FiberServer) loginPost(c *fiber.Ctx) error {
 //	@Tags		auth
 //	@Summary	Log out of the current session
 //	@Router		/v1/logout [post]
-func (s *FiberServer) logoutPost(c *fiber.Ctx) error {
-	sess, err := s.store.Get(c)
+func (s *Controller) logoutPost(c *fiber.Ctx) error {
+	sess, err := s.Store.Get(c)
 	if err != nil {
 		return err
 	}
 
-	s.db.Exec(`UPDATE users SET remember_token = 'NULL' WHERE remember_token = ?;`, sess.ID())
+	s.DB.Exec(`UPDATE users SET remember_token = 'NULL' WHERE remember_token = ?;`, sess.ID())
 
 	sess.Destroy()
 	defer sess.Save()
