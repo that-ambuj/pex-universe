@@ -1,8 +1,11 @@
 package server
 
 import (
+	"math"
+	"pex-universe/model"
 	"pex-universe/model/address"
 	"pex-universe/model/user"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -20,7 +23,7 @@ func (s *FiberServer) RegisterProfileRoutes() {
 }
 
 type ProfileUpdateDto struct {
-	Name string `validate:"required" json:"name" example:"John Doe"`
+	Name string `validate:"required" example:"John Doe"`
 }
 
 // profileGet
@@ -70,6 +73,12 @@ func (s *FiberServer) profilePut(c *fiber.Ctx) error {
 	s.db.Get(newUser, `SELECT * FROM users WHERE id = ?;`, u.Id)
 
 	return c.Status(fiber.StatusCreated).JSON(newUser)
+}
+
+type AddressesResponse struct {
+	Data        []*address.Address
+	CurrentPage int
+	TotalPages  int
 }
 
 // addressGet
@@ -133,11 +142,11 @@ func (s *FiberServer) addressByIdGet(c *fiber.Ctx) error {
 
 // addressPost
 //
-//	@Summary 	Create a new `Address` for the current `User`
-//	@Tags		profile
-//	@Produce	json
-//	@Success	200	{array}	address.Address
-//	@Router		/v1/profile/addresses [post]
+//	@Description	Create a new `Address` for the current `User`
+//	@Tags			profile
+//	@Produce		json
+//	@Success		201	{object}	address.Address
+//	@Router			/v1/profile/addresses [post]
 func (s *FiberServer) addressPost(c *fiber.Ctx) error {
 	user := c.Locals("user").(*user.User)
 
@@ -155,21 +164,17 @@ func (s *FiberServer) addressPost(c *fiber.Ctx) error {
 
 	dto.UserId = user.Id
 
-	err = dto.CreateNew(s.db.DB)
+	lastId, err := dto.CreateNew(s.db)
 	if err != nil {
 		return err
 	}
 
-	addrs, err := address.FindManyByUserId(s.db.DB, user.Id)
+	addr, err := address.FindById(s.db, uint64(lastId), user.Id)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(addrs)
-}
-
-func (s *FiberServer) addressByIdGet(c *fiber.Ctx) error {
-	return fiber.ErrNotImplemented
+	return c.Status(201).JSON(addr)
 }
 
 func (s *FiberServer) addressByIdPut(c *fiber.Ctx) error {
