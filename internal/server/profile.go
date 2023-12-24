@@ -90,6 +90,30 @@ func (s *FiberServer) addressGet(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(addresses)
+
+// addressByIdGet
+//
+//	@Description	Get `Address` Info By Id
+//	@Tags			profile
+//	@Produce		json
+//	@Param			id							path		int	true	"Address ID"
+//	@Success		200							{object}	address.Address
+//	@Router			/v1/profile/addresses/{id} 	[get]
+func (s *FiberServer) addressByIdGet(c *fiber.Ctx) error {
+	u := c.Locals("user").(*user.User)
+
+	idStr := c.Params("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	addr, err := address.FindById(s.db, uint64(id), u.Id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(addr)
 }
 
 // addressPost
