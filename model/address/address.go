@@ -3,10 +3,13 @@ package address
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"pex-universe/model"
 	"pex-universe/types"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 )
 
 type (
@@ -51,15 +54,32 @@ type (
 	}
 )
 
-type AddressCreateDto struct {
-	Address
-	// Foriegn Keys
-	CountryId uint64
-	StateId   uint64
-	UserId    uint64
-}
+type (
+	AddressCreateDto struct {
+		Address
+		// Foriegn Keys
+		CountryId uint64
+		StateId   uint64
+		UserId    uint64
+	}
 
-func FindManyByUserId(db *sql.DB, userId uint64) ([]*Address, error) {
+	AddressUpdateDto struct {
+		FirstName      string
+		LastName       string
+		Company        types.NullString `swaggertype:"string"`
+		StreetAddress1 string           `db:"street_address"`
+		StreetAddress2 types.NullString `swaggertype:"string"`
+		City           string
+		Zip            string
+		Phone          string
+		Ext            string
+		Email          string
+		StateId        uint64
+		CountryId      uint64
+	}
+)
+
+func FindManyByUserId(db *sqlx.DB, userId uint64, pagination model.PaginationDto) ([]*Address, error) {
 	addrs := []*Address{}
 
 	query := `
@@ -142,19 +162,19 @@ WHERE a.user_id = ?;
 	return addrs, nil
 }
 
-func (a *AddressCreateDto) CreateNew(db *sql.DB) error {
+func (a *AddressCreateDto) CreateNew(db *sqlx.DB) (int64, error) {
 	if a.UserId < 1 {
-		return errors.New("UserId not set.")
+		return 0, errors.New("UserId not set.")
 	}
 
 	if a.StateId < 1 {
-		return fiber.NewError(400, "Please set state_id.")
+		return 0, fiber.NewError(400, "Please set state_id.")
 	}
 	if a.CountryId < 1 {
-		return fiber.NewError(400, "Please set country_id.")
+		return 0, fiber.NewError(400, "Please set country_id.")
 	}
 
-	_, err := db.Exec(`
+	res, err := db.Exec(`
 	INSERT INTO addresses(
 		verified,
 		first_name,
@@ -196,8 +216,103 @@ func (a *AddressCreateDto) CreateNew(db *sql.DB) error {
 	)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return lastId, nil
+}
+
+func FindById(db *sqlx.DB, id, userId uint64) (*Address, error) {
+	query := `
+SELECT a.id,
+	a.created_at,
+	a.updated_at,
+	a.verified,
+	a.first_name,
+	a.last_name,
+	a.company,
+	a.street_address,
+	a.street_address2,
+	a.city,
+	a.zip,
+	a.phone,
+	a.ext,
+	a.email,
+
+	s.name,
+	s.full_name,
+	s.tax,
+	s.info,
+
+	c.name,
+	c.display_name,
+	c.pp_code,
+	c.locked
+FROM addresses a
+         JOIN states s ON a.state_id = s.id
+         JOIN countries c ON a.country_id = c.id
+WHERE a.id = ? AND a.user_id = ?
+LIMT 1
+`
+
+	addr := &Address{}
+
+	addr.State = &State{}
+	addr.Country = &Country{}
+
+	rows := db.QueryRow(query, id, userId)
+
+	err := rows.Scan(
+		&addr.Id,
+		&addr.CreatedAt,
+		&addr.UpdatedAt,
+		&addr.Verified,
+		&addr.FirstName,
+		&addr.LastName,
+		&addr.Company,
+		&addr.StreetAddress1,
+		&addr.StreetAddress2,
+		&addr.City,
+		&addr.Zip,
+		&addr.Phone,
+		&addr.Ext,
+		&addr.Email,
+
+		&addr.State.Name,
+		&addr.State.FullName,
+		&addr.State.Tax,
+		&addr.State.Info,
+
+		&addr.Country.Name,
+		&addr.Country.DisplayName,
+		&addr.Country.PpCode,
+		&addr.Country.Locked,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fiber.NewError(404, fmt.Sprintf("No such address with id, %d", id))
+		}
+
+		return nil, err
+	}
+
+	return addr, nil
+}
+
+func CountByUserId(db *sqlx.DB, userId uint64) (uint64, error) {
+	count := uint64(0)
+
+	err := db.Get(&count, `SELECT COUNT(*) count FROM addresses WHERE user_id = ?;`, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+
 }
