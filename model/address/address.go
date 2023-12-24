@@ -79,7 +79,7 @@ type (
 	}
 )
 
-func FindManyByUserId(db *sqlx.DB, userId uint64, pagination model.PaginationDto) ([]*Address, error) {
+func FindManyByUserId(db *sqlx.DB, userId uint64, p *model.PaginationDto) ([]*Address, error) {
 	addrs := []*Address{}
 
 	query := `
@@ -110,10 +110,12 @@ SELECT a.id,
 FROM addresses a
          JOIN states s ON a.state_id = s.id
          JOIN countries c ON a.country_id = c.id
-WHERE a.user_id = ?;
+WHERE a.user_id = ?
+LIMIT ?
+OFFSET ?
 `
 
-	rows, err := db.Query(query, userId)
+	rows, err := db.Query(query, userId, p.Limit, p.Skip())
 	if err != nil {
 		return nil, err
 	}
