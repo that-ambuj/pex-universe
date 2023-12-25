@@ -35,6 +35,7 @@ test:
 	@APP_ENV=test go test ./tests -v
 	@APP_ENV=test go test ./internal/config -v
 	@APP_ENV=test go test ./internal/server -v
+	@APP_ENV=test go test ./routes -v
 
 # Clean the binary
 clean:
