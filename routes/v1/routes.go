@@ -2,14 +2,16 @@ package routes
 
 import (
 	"fmt"
-	"os/user"
-	"pex-universe/internal/database"
-	"pex-universe/internal/server"
 	"strings"
 	"time"
 
+	"pex-universe/internal/database"
+	"pex-universe/internal/server"
+	"pex-universe/model/user"
+
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/swagger"
 
 	_ "pex-universe/docs"
@@ -48,6 +50,7 @@ func (s *Controller) UserAuthMiddleware(c *fiber.Ctx) error {
 
 	err = s.DB.Get(u, `SELECT * FROM users WHERE remember_token = ?`, token)
 	if err != nil {
+		log.Error(err)
 		return fiber.NewError(fiber.StatusUnauthorized, "User Token Expired")
 	}
 
