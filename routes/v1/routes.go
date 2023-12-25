@@ -11,6 +11,8 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+
+	_ "pex-universe/docs"
 )
 
 type Controller server.FiberServer
