@@ -259,7 +259,7 @@ FROM addresses a
          JOIN states s ON a.state_id = s.id
          JOIN countries c ON a.country_id = c.id
 WHERE a.id = ? AND a.user_id = ?
-LIMT 1
+LIMIT 1
 `
 
 	addr := &Address{}
