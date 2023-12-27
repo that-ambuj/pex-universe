@@ -9,27 +9,27 @@ import (
 	"pex-universe/internal/server"
 	"pex-universe/model/user"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/swagger"
+	"github.com/iancoleman/strcase"
 
 	_ "pex-universe/docs"
 )
 
 type Controller server.FiberServer
 
-func (c *Controller) RegisterRoutes() {
-	c.Get("/swagger/*", swagger.HandlerDefault)
+func (s *Controller) RegisterRoutes() {
+	s.Get("/swagger/*", swagger.HandlerDefault)
 
-	c.Get("/hello", c.HelloWorldHandler)
-	c.Get("/health", c.healthHandler)
+	s.Get("/hello", s.HelloWorldHandler)
+	s.Get("/health", s.healthHandler)
+	s.RegisterAuthRoutes()
 
-	c.RegisterAuthRoutes()
+	s.Use("/v1/*", s.UserAuthMiddleware)
 
-	c.Use("/v1/*", c.UserAuthMiddleware)
-
-	c.RegisterProfileRoutes()
+	s.RegisterProfileRoutes()
 }
 
 func (s *Controller) UserAuthMiddleware(c *fiber.Ctx) error {
@@ -67,12 +67,22 @@ func (s *Controller) ValidateStruct(data interface{}) error {
 		errMsgs := make([]string, 0)
 
 		for _, err := range errs.(validator.ValidationErrors) {
+			var (
+				field = strcase.ToSnake(err.Field())
+				tag   = err.Tag()
+				val   = err.Value()
+				param = err.Param()
+			)
+
+			if param != "" {
+				tag = tag + ": " + param
+			}
+
 			errMsgs = append(errMsgs, fmt.Sprintf(
-				"[%s]: '%v' | Needs to implement '%s' (param: '%s')",
-				err.Field(),
-				err.Value(),
-				err.Tag(),
-				err.Param(),
+				"%s has failed the constraint: %s (value: '%v')",
+				field,
+				tag,
+				val,
 			))
 		}
 
