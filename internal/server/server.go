@@ -11,6 +11,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/iancoleman/strcase"
 
+	"gorm.io/gorm"
+	"gorm.io/gorm/mysql"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/storage/sqlite3/v2"
 	"github.com/jmoiron/sqlx"
@@ -19,7 +22,8 @@ import (
 
 type FiberServer struct {
 	*fiber.App
-	DB    *sqlx.DB
+	OldDB *sqlx.DB
+	DB    *gorm.DB
 	V     *validator.Validate
 	Store *session.Store
 }
@@ -89,9 +93,17 @@ func New() *FiberServer {
 	db := database.New()
 	db.MapperFunc(strcase.ToSnake)
 
+	gormDB, err := gorm.Open(mysql.New(mysql.Config{
+		Conn: db.DB,
+	}))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	server := &FiberServer{
 		App:   app,
-		DB:    db,
+		OldDB: db,
+		DB:    gormDB,
 		V:     validator.New(),
 		Store: session.New(sessionConfig),
 	}

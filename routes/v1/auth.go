@@ -46,7 +46,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 	count := 0
 
 	// Ignore errors here, only checking existence
-	s.DB.QueryRow(`SELECT COUNT(*) as count FROM users WHERE email = ?`, u.Email).Scan(&count)
+	s.OldDB.QueryRow(`SELECT COUNT(*) as count FROM users WHERE email = ?`, u.Email).Scan(&count)
 
 	if count > 0 {
 		return &fiber.Error{
@@ -62,7 +62,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err = s.DB.Exec(`
+	_, err = s.OldDB.Exec(`
 		INSERT INTO
 			users (name, email, password, created_at, updated_at)
 			VALUES (?, ?, ?, ?, ?);`,
@@ -77,7 +77,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 
 	newUser := new(user.User)
 
-	err = s.DB.Get(newUser, `SELECT * FROM users WHERE email = ?`, u.Email)
+	err = s.OldDB.Get(newUser, `SELECT * FROM users WHERE email = ?`, u.Email)
 	if err != nil {
 		return fiber.NewError(400, err.Error())
 	}
@@ -110,7 +110,7 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 
 	user := new(user.User)
 
-	err = s.DB.Get(user, `SELECT * FROM users WHERE email = ?;`, u.Email)
+	err = s.OldDB.Get(user, `SELECT * FROM users WHERE email = ?;`, u.Email)
 	if err != nil {
 		return fiber.NewError(404, fmt.Sprintf("User with email `%s` was not found.", u.Email))
 	}
@@ -132,7 +132,7 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 
 	newToken := sess.ID()
 
-	_, err = s.DB.Exec(`UPDATE users SET remember_token = ? WHERE id = ?;`, newToken, user.Id)
+	_, err = s.OldDB.Exec(`UPDATE users SET remember_token = ? WHERE id = ?;`, newToken, user.Id)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func (s *Controller) logoutPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	s.DB.Exec(`UPDATE users SET remember_token = 'NULL' WHERE remember_token = ?;`, sess.ID())
+	s.OldDB.Exec(`UPDATE users SET remember_token = 'NULL' WHERE remember_token = ?;`, sess.ID())
 
 	sess.Destroy()
 	defer sess.Save()

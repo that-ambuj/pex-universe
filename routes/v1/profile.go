@@ -64,13 +64,13 @@ func (s *Controller) profilePut(c *fiber.Ctx) error {
 
 	u := c.Locals("user").(*user.User)
 
-	_, err = s.DB.Exec(`UPDATE users SET name = ? WHERE id = ?;`, dto.Name, u.Id)
+	_, err = s.OldDB.Exec(`UPDATE users SET name = ? WHERE id = ?;`, dto.Name, u.Id)
 	if err != nil {
 		return err
 	}
 
 	newUser := new(user.User)
-	s.DB.Get(newUser, `SELECT * FROM users WHERE id = ?;`, u.Id)
+	s.OldDB.Get(newUser, `SELECT * FROM users WHERE id = ?;`, u.Id)
 
 	return c.Status(fiber.StatusCreated).JSON(newUser)
 }
@@ -101,12 +101,12 @@ func (s *Controller) addressGet(c *fiber.Ctx) error {
 		Limit: limit,
 	}
 
-	addrs, err := address.FindManyByUserId(s.DB, user.Id, pagination)
+	addrs, err := address.FindManyByUserId(s.OldDB, user.Id, pagination)
 	if err != nil {
 		return err
 	}
 
-	count, err := address.CountByUserId(s.DB, user.Id)
+	count, err := address.CountByUserId(s.OldDB, user.Id)
 
 	return c.JSON(AddressesResponse{
 		Data:        addrs,
@@ -132,7 +132,7 @@ func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	addr, err := address.FindById(s.DB, uint64(id), u.Id)
+	addr, err := address.FindById(s.OldDB, uint64(id), u.Id)
 	if err != nil {
 		return err
 	}
@@ -164,12 +164,12 @@ func (s *Controller) addressPost(c *fiber.Ctx) error {
 
 	dto.UserId = user.Id
 
-	lastId, err := dto.CreateNew(s.DB)
+	lastId, err := dto.CreateNew(s.OldDB)
 	if err != nil {
 		return err
 	}
 
-	addr, err := address.FindById(s.DB, uint64(lastId), user.Id)
+	addr, err := address.FindById(s.OldDB, uint64(lastId), user.Id)
 	if err != nil {
 		return err
 	}
@@ -206,12 +206,12 @@ func (s *Controller) addressByIdPut(c *fiber.Ctx) error {
 		return err
 	}
 
-	err = dto.UpdateById(s.DB, user.Id)
+	err = dto.UpdateById(s.OldDB, user.Id)
 	if err != nil {
 		return err
 	}
 
-	newAddr, err := address.FindById(s.DB, dto.Id, user.Id)
+	newAddr, err := address.FindById(s.OldDB, dto.Id, user.Id)
 	if err != nil {
 		return err
 	}
