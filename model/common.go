@@ -26,6 +26,12 @@ type PaginatedResponse struct {
 	TotalPages  int
 }
 
+type ErrorResponse struct {
+	Success bool   `example:"false"`
+	Status  uint   `example:"400"`
+	Message string `example:"'field' has failed the constraint: 'constraint' (vale: 'actual value')"`
+}
+
 func IsNonZero(val *reflect.Value) bool {
 	return val.CanUint() && !val.IsZero()
 }
