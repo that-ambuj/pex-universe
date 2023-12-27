@@ -8,7 +8,6 @@ import (
 	"pex-universe/routes/v1"
 	"strconv"
 
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -26,7 +25,6 @@ var (
 //	@BasePath	/
 func main() {
 	s := routes.Controller(*server.New())
-	s.Use(cors.New())
 
 	s.RegisterRoutes()
 

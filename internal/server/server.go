@@ -4,9 +4,15 @@ import (
 	"fmt"
 	"os"
 	"pex-universe/internal/database"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
+	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/session"
 
 	"gorm.io/gorm"
@@ -67,7 +73,8 @@ func New() *FiberServer {
 	// sessionConfig.CookieDomain = ""
 
 	// TODO: Use Redis for storage
-	sessionConfig.Storage = sqlite3.New()
+	storage := sqlite3.New()
+	sessionConfig.Storage = storage
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: ErrorHandler,
@@ -75,7 +82,24 @@ func New() *FiberServer {
 		JSONDecoder:  json.UnmarshalSnakeCase,
 	})
 
+	app.Use(fiberLogger.New())
+	app.Use(cors.New())
+	// app.Use(helmet.New())
+	app.Use(limiter.New(limiter.Config{
+		SkipFailedRequests: true,
+		Next: func(c *fiber.Ctx) bool {
+			return c.IP() == "127.0.0.1"
+		},
+		Storage:    storage,
+		Max:        20,
+		Expiration: 30 * time.Second,
+	}))
+
+	app.Get("/metrics", monitor.New())
+
 	env := os.Getenv("APP_ENV")
+
+	db := database.New()
 
 	if env != "test" {
 		app.Hooks().OnRoute(func(r fiber.Route) error {
@@ -84,8 +108,6 @@ func New() *FiberServer {
 			return nil
 		})
 	}
-
-	db := database.New()
 
 	server := &FiberServer{
 		App:   app,
