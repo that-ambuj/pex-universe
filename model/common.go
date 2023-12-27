@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"reflect"
+	"time"
+)
 
 type AutoInc struct {
 	Id        uint64     `db:"id" json:"id"`
@@ -21,4 +24,12 @@ type PaginatedResponse struct {
 	Data        interface{}
 	CurrentPage int
 	TotalPages  int
+}
+
+func IsNonZero(val *reflect.Value) bool {
+	return val.CanUint() && !val.IsZero()
+}
+
+func IsNotEmptyString(val *reflect.Value) bool {
+	return val.Kind() == reflect.String && val.String() != ""
 }

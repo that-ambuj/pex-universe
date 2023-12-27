@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"reflect"
+	"time"
+
 	"pex-universe/model"
 	"pex-universe/types"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
@@ -64,11 +66,12 @@ type (
 	}
 
 	AddressUpdateDto struct {
+		Id             uint64
 		FirstName      string
 		LastName       string
-		Company        types.NullString `swaggertype:"string"`
-		StreetAddress1 string           `db:"street_address"`
-		StreetAddress2 types.NullString `swaggertype:"string"`
+		Company        string
+		StreetAddress1 string `db:"street_address"`
+		StreetAddress2 string
 		City           string
 		Zip            string
 		Phone          string
@@ -305,6 +308,56 @@ LIMIT 1
 	}
 
 	return addr, nil
+}
+
+func (a *AddressUpdateDto) UpdateById(db *sqlx.DB, userId uint64) error {
+	count := 0
+
+	db.Get(&count, `
+	SELECT COUNT(*)
+	FROM addresses
+	WHERE id = ? AND user_id = ?`,
+		a.Id,
+		userId,
+	)
+
+	// Check if the address like that already exists
+	if count < 1 {
+		return fiber.NewError(404, fmt.Sprintf("No such address with id, %d", a.Id))
+	}
+
+	query := "UPDATE addresses SET `%s` = ? WHERE id = ? AND user_id = ?"
+
+	v := reflect.ValueOf(*a)
+	fm := db.Mapper.FieldMap(v)
+
+	delete(fm, "id")
+
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	for key, val := range fm {
+		if model.IsNonZero(&val) {
+			_, err = tx.Exec(fmt.Sprintf(query, key), val.Uint(), a.Id, userId)
+		}
+
+		if model.IsNotEmptyString(&val) {
+			_, err = tx.Exec(fmt.Sprintf(query, key), val.String(), a.Id, userId)
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func CountByUserId(db *sqlx.DB, userId uint64) (uint64, error) {

@@ -182,10 +182,40 @@ func (s *Controller) addressPost(c *fiber.Ctx) error {
 //	@Description	Update an `Address` by it's `ID`.
 //	@Tags			profile
 //	@Produce		json
-//	@Param			id	path		int	true	"Address ID"
-//	@Success		200	{object}	address.Address
+//	@Param			id		path		int							true	"Address ID"
+//	@Param			request	body		address.AddressUpdateDto	true	"Request Body"
+//	@Success		200		{object}	address.Address
 //	@Router			/v1/profile/addresses/{id} [put]
 func (s *Controller) addressByIdPut(c *fiber.Ctx) error {
+	user := c.Locals("user").(*user.User)
 
-	return fiber.ErrNotImplemented
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return fiber.NewError(400, err.Error())
+	}
+
+	dto := &address.AddressUpdateDto{Id: uint64(id)}
+
+	err = c.BodyParser(dto)
+	if err != nil {
+		return fiber.NewError(400, err.Error())
+	}
+
+	err = s.ValidateStruct(dto)
+	if err != nil {
+		return err
+	}
+
+	err = dto.UpdateById(s.DB, user.Id)
+	if err != nil {
+		return err
+	}
+
+	newAddr, err := address.FindById(s.DB, dto.Id, user.Id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(newAddr)
+
 }
