@@ -203,6 +203,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/address.Address"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -268,6 +274,32 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Get ` + "`" + `Address` + "`" + ` Info By ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Address ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/address.Address"
+                        }
+                    }
+                }
             }
         },
         "/v1/signup": {
@@ -308,7 +340,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Tokyo"
                 },
                 "company": {
                     "type": "string"
@@ -320,22 +353,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "john@example.com"
                 },
                 "ext": {
                     "type": "string"
                 },
                 "firstName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "John"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "lastName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Doe"
                 },
                 "phone": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "+11349503120"
                 },
                 "state": {
                     "$ref": "#/definitions/address.State"
@@ -361,31 +398,38 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Los Angeles"
                 },
                 "company": {
                     "type": "string"
                 },
                 "countryID": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "john@example.com"
                 },
                 "ext": {
                     "type": "string"
                 },
                 "firstName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "John"
                 },
                 "lastName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Doe"
                 },
                 "phone": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "+12380941034"
                 },
                 "stateID": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "streetAddress1": {
                     "type": "string"
@@ -402,31 +446,38 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "New York"
                 },
                 "company": {
                     "type": "string"
                 },
                 "countryId": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "john@example.com"
                 },
                 "ext": {
                     "type": "string"
                 },
                 "firstName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Jane"
                 },
                 "lastName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Doe"
                 },
                 "phone": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "+12380941034"
                 },
                 "stateId": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "streetAddress1": {
                     "type": "string"
@@ -473,9 +524,29 @@ const docTemplate = `{
                 }
             }
         },
+        "model.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "'field' has failed the constraint: 'constraint' (vale: 'actual value')"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
         "routes.AddressesResponse": {
             "type": "object",
             "properties": {
+                "count": {
+                    "type": "integer"
+                },
                 "currentPage": {
                     "type": "integer"
                 },

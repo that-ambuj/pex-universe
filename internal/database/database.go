@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	l "log"
 	"os"
 	"time"
 
@@ -30,7 +29,7 @@ func New() *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", username, password, host, port, dbname)
 
 	gormLogger := logger.New(
-		l.New(os.Stdout, "\r\n", l.LstdFlags),
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
 			LogLevel: logger.Info,
 		},

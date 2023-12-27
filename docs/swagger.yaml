@@ -3,6 +3,7 @@ definitions:
   address.Address:
     properties:
       city:
+        example: Tokyo
         type: string
       company:
         type: string
@@ -11,16 +12,20 @@ definitions:
       createdAt:
         type: string
       email:
+        example: john@example.com
         type: string
       ext:
         type: string
       firstName:
+        example: John
         type: string
       id:
         type: integer
       lastName:
+        example: Doe
         type: string
       phone:
+        example: "+11349503120"
         type: string
       state:
         $ref: '#/definitions/address.State'
@@ -38,22 +43,29 @@ definitions:
   address.AddressCreateDto:
     properties:
       city:
+        example: Los Angeles
         type: string
       company:
         type: string
       countryID:
+        minimum: 1
         type: integer
       email:
+        example: john@example.com
         type: string
       ext:
         type: string
       firstName:
+        example: John
         type: string
       lastName:
+        example: Doe
         type: string
       phone:
+        example: "+12380941034"
         type: string
       stateID:
+        minimum: 1
         type: integer
       streetAddress1:
         type: string
@@ -65,22 +77,29 @@ definitions:
   address.AddressUpdateDto:
     properties:
       city:
+        example: New York
         type: string
       company:
         type: string
       countryId:
+        minimum: 1
         type: integer
       email:
+        example: john@example.com
         type: string
       ext:
         type: string
       firstName:
+        example: Jane
         type: string
       lastName:
+        example: Doe
         type: string
       phone:
+        example: "+12380941034"
         type: string
       stateId:
+        minimum: 1
         type: integer
       streetAddress1:
         type: string
@@ -111,8 +130,23 @@ definitions:
       tax:
         type: number
     type: object
+  model.ErrorResponse:
+    properties:
+      message:
+        example: '''field'' has failed the constraint: ''constraint'' (vale: ''actual
+          value'')'
+        type: string
+      status:
+        example: 400
+        type: integer
+      success:
+        example: false
+        type: boolean
+    type: object
   routes.AddressesResponse:
     properties:
+      count:
+        type: integer
       currentPage:
         type: integer
       data:
@@ -308,9 +342,30 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/address.Address'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
       tags:
       - profile
   /v1/profile/addresses/{id}:
+    delete:
+      description: Get `Address` Info By ID
+      parameters:
+      - description: Address ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/address.Address'
+      tags:
+      - profile
     get:
       description: Get `Address` Info By ID
       parameters:
