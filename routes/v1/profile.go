@@ -1,12 +1,15 @@
 package routes
 
 import (
+	"fmt"
 	"math"
 	"pex-universe/model/address"
 	"pex-universe/model/user"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
+	"gorm.io/gorm"
 )
 
 func (s *Controller) RegisterProfileRoutes() {
@@ -19,6 +22,7 @@ func (s *Controller) RegisterProfileRoutes() {
 	v1.Get("/profile/addresses/:id", s.addressByIdGet)
 	v1.Post("/profile/addresses", s.addressPost)
 	v1.Put("/profile/addresses/:id", s.addressByIdPut)
+	v1.Delete("/profile/addresses/:id", s.addressByIdDelete)
 }
 
 type ProfileUpdateDto struct {
@@ -56,6 +60,7 @@ func (s *Controller) profilePut(c *fiber.Ctx) error {
 
 	err = s.ValidateStruct(dto)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -65,6 +70,7 @@ func (s *Controller) profilePut(c *fiber.Ctx) error {
 
 	err = s.DB.Save(&u).Error
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -75,6 +81,7 @@ type AddressesResponse struct {
 	Data        []address.Address
 	CurrentPage int
 	TotalPages  int
+	Count       int
 }
 
 // addressGet
@@ -105,6 +112,7 @@ func (s *Controller) addressGet(c *fiber.Ctx) error {
 		Count(&count).Error
 
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -114,6 +122,7 @@ func (s *Controller) addressGet(c *fiber.Ctx) error {
 		Data:        addrs,
 		CurrentPage: page,
 		TotalPages:  totalPages,
+		Count:       int(count),
 	})
 }
 
@@ -145,7 +154,14 @@ func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
 		}).
 		First(&addr).Error
 
+	if err == gorm.ErrRecordNotFound {
+		return fiber.NewError(404,
+			fmt.Sprintf("Address with ID: %d does not exist.", id),
+		)
+	}
+
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -157,8 +173,9 @@ func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
 //	@Description	Create a new `Address` for the current `User`
 //	@Tags			profile
 //	@Produce		json
-//	@Param			request	body	address.AddressCreateDto	true	"Request Body"
-//	@Success		201	{object}	address.Address
+//	@Param			request	body		address.AddressCreateDto	true	"Request Body"
+//	@Success		201		{object}	address.Address
+//	@Failure		400		{object}	model.ErrorResponse
 //	@Router			/v1/profile/addresses [post]
 func (s *Controller) addressPost(c *fiber.Ctx) error {
 	user := c.Locals("user").(user.User)
@@ -172,6 +189,7 @@ func (s *Controller) addressPost(c *fiber.Ctx) error {
 
 	err = s.ValidateStruct(&dto)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -195,6 +213,7 @@ func (s *Controller) addressPost(c *fiber.Ctx) error {
 
 	err = s.DB.Create(&addr).Error
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -227,6 +246,7 @@ func (s *Controller) addressByIdPut(c *fiber.Ctx) error {
 
 	err = s.ValidateStruct(&dto)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -243,4 +263,42 @@ func (s *Controller) addressByIdPut(c *fiber.Ctx) error {
 		First(&addr)
 
 	return c.JSON(addr)
+}
+
+// addressByIdDelete
+//
+//	@Description	Get `Address` Info By ID
+//	@Tags			profile
+//	@Produce		json
+//	@Param			id							path		int	true	"Address ID"
+//	@Success		200							{object}	address.Address
+//	@Router			/v1/profile/addresses/{id} 	[delete]
+func (s *Controller) addressByIdDelete(c *fiber.Ctx) error {
+	user := c.Locals("user").(user.User)
+
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return fiber.NewError(400, err.Error())
+	}
+
+	addr := address.Address{
+		ID:     uint(id),
+		UserID: user.ID,
+	}
+
+	res := s.DB.Where(&addr).Delete(&addr)
+
+	if res.Error != nil {
+		return res.Error
+	}
+
+	if res.RowsAffected < 1 {
+		return fiber.NewError(404, fmt.Sprintf("Address with ID: %d does not exist.", id))
+	}
+
+	return c.JSON(map[string]interface{}{
+		"rows_affected": res.RowsAffected,
+		"message":       fmt.Sprintf("Address with ID: %d deleted successfully.", id),
+	})
+
 }
