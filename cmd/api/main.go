@@ -19,9 +19,11 @@ var (
 	certkey  = os.Getenv("CERT_KEY")
 )
 
-// @title		Pex Universe API
-// @version	1.0
-// @BasePath	/
+// main
+//
+//	@title		Pex Universe API
+//	@version	1.0
+//	@BasePath	/
 func main() {
 	s := routes.Controller(*server.New())
 	s.Use(cors.New())
