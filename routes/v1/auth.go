@@ -45,7 +45,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 
 	count := 0
 
-	// Ignore errors here, only checking existense
+	// Ignore errors here, only checking existence
 	s.DB.QueryRow(`SELECT COUNT(*) as count FROM users WHERE email = ?`, u.Email).Scan(&count)
 
 	if count > 0 {
