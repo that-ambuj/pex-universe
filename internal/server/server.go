@@ -3,23 +3,22 @@ package server
 import (
 	"fmt"
 	"os"
-
 	"pex-universe/internal/database"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/iancoleman/strcase"
+
+	"gorm.io/gorm"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/storage/sqlite3/v2"
-	"github.com/jmoiron/sqlx"
 	json "github.com/mixcode/golib-json-snake"
 )
 
 type FiberServer struct {
 	*fiber.App
-	DB    *sqlx.DB
+	DB    *gorm.DB
 	V     *validator.Validate
 	Store *session.Store
 }
@@ -87,7 +86,6 @@ func New() *FiberServer {
 	}
 
 	db := database.New()
-	db.MapperFunc(strcase.ToSnake)
 
 	server := &FiberServer{
 		App:   app,

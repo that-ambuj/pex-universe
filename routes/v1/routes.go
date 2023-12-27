@@ -30,7 +30,6 @@ func (c *Controller) RegisterRoutes() {
 	c.Use("/v1/*", c.UserAuthMiddleware)
 
 	c.RegisterProfileRoutes()
-
 }
 
 func (s *Controller) UserAuthMiddleware(c *fiber.Ctx) error {
@@ -46,9 +45,9 @@ func (s *Controller) UserAuthMiddleware(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.ErrUnauthorized.Code, "Invalid User Session")
 	}
 
-	u := new(user.User)
+	u := user.User{}
 
-	err = s.DB.Get(u, `SELECT * FROM users WHERE remember_token = ?`, token)
+	err = s.DB.Where("remember_token = ?", token).First(&u).Error
 	if err != nil {
 		log.Error(err)
 		return fiber.NewError(fiber.StatusUnauthorized, "User Token Expired")
@@ -112,5 +111,10 @@ func (s *Controller) HelloWorldHandler(c *fiber.Ctx) error {
 //	@Success	200	{object}	Hello
 //	@Router		/health [get]
 func (s *Controller) healthHandler(c *fiber.Ctx) error {
-	return c.JSON(database.SqlxHealth(s.DB))
+	db, err := s.DB.DB()
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(database.SqlxHealth(db))
 }

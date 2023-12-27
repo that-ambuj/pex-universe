@@ -2,7 +2,6 @@ package routes
 
 import (
 	"math"
-	"pex-universe/model"
 	"pex-universe/model/address"
 	"pex-universe/model/user"
 	"strconv"
@@ -34,7 +33,7 @@ type ProfileUpdateDto struct {
 //	@Success	200	{object}	user.User
 //	@Router		/v1/profile [get]
 func (s *Controller) profileGet(c *fiber.Ctx) error {
-	user := c.Locals("user").(*user.User)
+	user := c.Locals("user")
 
 	return c.JSON(user)
 }
@@ -50,9 +49,7 @@ func (s *Controller) profileGet(c *fiber.Ctx) error {
 func (s *Controller) profilePut(c *fiber.Ctx) error {
 	dto := new(ProfileUpdateDto)
 
-	var err error
-
-	err = c.BodyParser(dto)
+	err := c.BodyParser(dto)
 	if err != nil {
 		return fiber.NewError(400, err.Error())
 	}
@@ -62,21 +59,20 @@ func (s *Controller) profilePut(c *fiber.Ctx) error {
 		return err
 	}
 
-	u := c.Locals("user").(*user.User)
+	u := c.Locals("user").(user.User)
 
-	_, err = s.DB.Exec(`UPDATE users SET name = ? WHERE id = ?;`, dto.Name, u.Id)
+	u.Name = dto.Name
+
+	err = s.DB.Save(&u).Error
 	if err != nil {
 		return err
 	}
 
-	newUser := new(user.User)
-	s.DB.Get(newUser, `SELECT * FROM users WHERE id = ?;`, u.Id)
-
-	return c.Status(fiber.StatusCreated).JSON(newUser)
+	return c.Status(fiber.StatusCreated).JSON(u)
 }
 
 type AddressesResponse struct {
-	Data        []*address.Address
+	Data        []address.Address
 	CurrentPage int
 	TotalPages  int
 }
@@ -91,40 +87,46 @@ type AddressesResponse struct {
 //	@Success		200		{array}	AddressesResponse
 //	@Router			/v1/profile/addresses [get]
 func (s *Controller) addressGet(c *fiber.Ctx) error {
-	user := c.Locals("user").(*user.User)
+	user := c.Locals("user").(user.User)
 
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
 
-	pagination := &model.PaginationDto{
-		Page:  page,
-		Limit: limit,
-	}
+	addrs := []address.Address{}
+	count := int64(0)
 
-	addrs, err := address.FindManyByUserId(s.DB, user.Id, pagination)
+	err := s.DB.
+		Joins("State").
+		Joins("Country").
+		Where(&address.Address{UserID: user.ID}).
+		Limit(limit).
+		Offset((page - 1) * limit).
+		Find(&addrs).
+		Count(&count).Error
+
 	if err != nil {
 		return err
 	}
 
-	count, err := address.CountByUserId(s.DB, user.Id)
+	totalPages := int(math.Ceil(float64(count) / float64(limit)))
 
 	return c.JSON(AddressesResponse{
 		Data:        addrs,
 		CurrentPage: page,
-		TotalPages:  int(math.Ceil(float64(count) / float64(limit))),
+		TotalPages:  totalPages,
 	})
 }
 
 // addressByIdGet
 //
-//	@Description	Get `Address` Info By Id
+//	@Description	Get `Address` Info By ID
 //	@Tags			profile
 //	@Produce		json
 //	@Param			id							path		int	true	"Address ID"
 //	@Success		200							{object}	address.Address
 //	@Router			/v1/profile/addresses/{id} 	[get]
 func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
-	u := c.Locals("user").(*user.User)
+	u := c.Locals("user").(user.User)
 
 	idStr := c.Params("id")
 	id, err := strconv.Atoi(idStr)
@@ -132,7 +134,17 @@ func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	addr, err := address.FindById(s.DB, uint64(id), u.Id)
+	addr := address.Address{}
+
+	err = s.DB.
+		Joins("State").
+		Joins("Country").
+		Where(&address.Address{
+			ID:     uint(id),
+			UserID: u.ID,
+		}).
+		First(&addr).Error
+
 	if err != nil {
 		return err
 	}
@@ -145,31 +157,43 @@ func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
 //	@Description	Create a new `Address` for the current `User`
 //	@Tags			profile
 //	@Produce		json
+//	@Param			request	body	address.AddressCreateDto	true	"Request Body"
 //	@Success		201	{object}	address.Address
 //	@Router			/v1/profile/addresses [post]
 func (s *Controller) addressPost(c *fiber.Ctx) error {
-	user := c.Locals("user").(*user.User)
+	user := c.Locals("user").(user.User)
 
-	dto := new(address.AddressCreateDto)
+	dto := address.AddressCreateDto{}
 
-	err := c.BodyParser(dto)
+	err := c.BodyParser(&dto)
 	if err != nil {
 		return fiber.NewError(400, err.Error())
 	}
 
-	err = s.ValidateStruct(dto)
+	err = s.ValidateStruct(&dto)
 	if err != nil {
 		return err
 	}
 
-	dto.UserId = user.Id
+	dto.UserID = user.ID
 
-	lastId, err := dto.CreateNew(s.DB)
-	if err != nil {
-		return err
+	addr := address.Address{
+		FirstName:      dto.FirstName,
+		LastName:       dto.LastName,
+		Company:        dto.Company,
+		StreetAddress1: dto.StreetAddress1,
+		StreetAddress2: dto.StreetAddress2,
+		City:           dto.City,
+		Zip:            dto.Zip,
+		Phone:          dto.Phone,
+		Ext:            dto.Ext,
+		Email:          dto.Email,
+		StateID:        dto.StateID,
+		CountryID:      dto.CountryID,
+		UserID:         user.ID,
 	}
 
-	addr, err := address.FindById(s.DB, uint64(lastId), user.Id)
+	err = s.DB.Create(&addr).Error
 	if err != nil {
 		return err
 	}
@@ -187,35 +211,36 @@ func (s *Controller) addressPost(c *fiber.Ctx) error {
 //	@Success		200		{object}	address.Address
 //	@Router			/v1/profile/addresses/{id} [put]
 func (s *Controller) addressByIdPut(c *fiber.Ctx) error {
-	user := c.Locals("user").(*user.User)
+	user := c.Locals("user").(user.User)
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return fiber.NewError(400, err.Error())
 	}
 
-	dto := &address.AddressUpdateDto{Id: uint64(id)}
+	dto := address.AddressUpdateDto{}
 
-	err = c.BodyParser(dto)
+	err = c.BodyParser(&dto)
 	if err != nil {
 		return fiber.NewError(400, err.Error())
 	}
 
-	err = s.ValidateStruct(dto)
+	err = s.ValidateStruct(&dto)
 	if err != nil {
 		return err
 	}
 
-	err = dto.UpdateById(s.DB, user.Id)
+	addr := address.Address{ID: uint(id), UserID: user.ID}
+
+	err = s.DB.Model(&addr).Updates(dto).Error
 	if err != nil {
 		return err
 	}
 
-	newAddr, err := address.FindById(s.DB, dto.Id, user.Id)
-	if err != nil {
-		return err
-	}
+	s.DB.
+		Joins("State").
+		Joins("Country").
+		First(&addr)
 
-	return c.JSON(newAddr)
-
+	return c.JSON(addr)
 }

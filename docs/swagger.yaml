@@ -35,6 +35,33 @@ definitions:
       zip:
         type: string
     type: object
+  address.AddressCreateDto:
+    properties:
+      city:
+        type: string
+      company:
+        type: string
+      countryID:
+        type: integer
+      email:
+        type: string
+      ext:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      phone:
+        type: string
+      stateID:
+        type: integer
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      zip:
+        type: string
+    type: object
   address.AddressUpdateDto:
     properties:
       city:
@@ -49,8 +76,6 @@ definitions:
         type: string
       firstName:
         type: string
-      id:
-        type: integer
       lastName:
         type: string
       phone:
@@ -116,7 +141,7 @@ definitions:
         items:
           $ref: '#/definitions/address.Address'
         type: array
-      created_at:
+      createdAt:
         type: string
       email:
         type: string
@@ -124,7 +149,7 @@ definitions:
         type: integer
       name:
         type: string
-      updated_at:
+      updatedAt:
         type: string
     type: object
   user.UserLoginDto:
@@ -269,6 +294,13 @@ paths:
       - profile
     post:
       description: Create a new `Address` for the current `User`
+      parameters:
+      - description: Request Body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/address.AddressCreateDto'
       produces:
       - application/json
       responses:
@@ -280,7 +312,7 @@ paths:
       - profile
   /v1/profile/addresses/{id}:
     get:
-      description: Get `Address` Info By Id
+      description: Get `Address` Info By ID
       parameters:
       - description: Address ID
         in: path
