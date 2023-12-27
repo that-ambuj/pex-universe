@@ -2,29 +2,22 @@ package server
 
 import (
 	"fmt"
-	l "log"
 	"os"
-
 	"pex-universe/internal/database"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/iancoleman/strcase"
 
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/storage/sqlite3/v2"
-	"github.com/jmoiron/sqlx"
 	json "github.com/mixcode/golib-json-snake"
 )
 
 type FiberServer struct {
 	*fiber.App
-	OldDB *sqlx.DB
 	DB    *gorm.DB
 	V     *validator.Validate
 	Store *session.Store
@@ -93,26 +86,10 @@ func New() *FiberServer {
 	}
 
 	db := database.New()
-	db.MapperFunc(strcase.ToSnake)
-
-	gormLogger := logger.New(
-		l.New(os.Stdout, "\r\n", l.LstdFlags),
-		logger.Config{
-			LogLevel: logger.Info,
-		},
-	)
-
-	gormDB, err := gorm.Open(mysql.New(mysql.Config{
-		Conn: db.DB,
-	}), &gorm.Config{Logger: gormLogger})
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	server := &FiberServer{
 		App:   app,
-		OldDB: db,
-		DB:    gormDB,
+		DB:    db,
 		V:     validator.New(),
 		Store: session.New(sessionConfig),
 	}

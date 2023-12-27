@@ -2,17 +2,21 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
+	l "log"
 	"os"
-	"pex-universe/internal/config"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
+	"pex-universe/internal/config"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
-func New() *sqlx.DB {
+func New() *gorm.DB {
 	config.LoadEnv()
 
 	var (
@@ -23,21 +27,24 @@ func New() *sqlx.DB {
 		host     = os.Getenv("DB_HOST")
 	)
 
-	// Opening a driver typically will not attempt to connect to the database.
-	db, err := sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", username, password, host, port, dbname))
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", username, password, host, port, dbname)
+
+	gormLogger := logger.New(
+		l.New(os.Stdout, "\r\n", l.LstdFlags),
+		logger.Config{
+			LogLevel: logger.Info,
+		},
+	)
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: gormLogger})
 	if err != nil {
-		// This will not be a connection error, but a DSN parse error or
-		// another initialization error.
 		log.Fatal(err)
 	}
-	db.SetConnMaxLifetime(0)
-	db.SetMaxIdleConns(50)
-	db.SetMaxOpenConns(50)
 
 	return db
 }
 
-func SqlxHealth(d *sqlx.DB) map[string]string {
+func SqlxHealth(d *sql.DB) map[string]string {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 

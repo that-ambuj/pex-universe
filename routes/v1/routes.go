@@ -111,5 +111,10 @@ func (s *Controller) HelloWorldHandler(c *fiber.Ctx) error {
 //	@Success	200	{object}	Hello
 //	@Router		/health [get]
 func (s *Controller) healthHandler(c *fiber.Ctx) error {
-	return c.JSON(database.SqlxHealth(s.OldDB))
+	db, err := s.DB.DB()
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(database.SqlxHealth(db))
 }
