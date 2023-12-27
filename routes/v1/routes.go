@@ -27,6 +27,8 @@ func (s *Controller) RegisterRoutes() {
 
 	s.Get("/hello", s.HelloWorldHandler)
 	s.Get("/health", s.healthHandler)
+
+	s.RegisterUtilRoutes()
 	s.RegisterAuthRoutes()
 
 	s.Use("/v1/*", s.UserAuthMiddleware)

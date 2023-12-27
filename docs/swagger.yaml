@@ -112,6 +112,8 @@ definitions:
     properties:
       displayName:
         type: string
+      id:
+        type: integer
       name:
         type: string
       position:
@@ -123,6 +125,8 @@ definitions:
     properties:
       fullName:
         type: string
+      id:
+        type: integer
       info:
         type: string
       name:
@@ -245,6 +249,20 @@ paths:
       summary: Hello World
       tags:
       - default
+  /v1/countries:
+    get:
+      description: Get List of `Country`es by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/address.Country'
+            type: array
+      tags:
+      - utility
   /v1/login:
     post:
       consumes:
@@ -426,4 +444,18 @@ paths:
             $ref: '#/definitions/user.User'
       tags:
       - auth
+  /v1/states:
+    get:
+      description: Get List of `States`es by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/address.State'
+            type: array
+      tags:
+      - utility
 swagger: "2.0"

@@ -31,7 +31,7 @@ type (
 	}
 
 	State struct {
-		ID              uint `gorm:"primaryKey" json:"-"`
+		ID              uint `gorm:"primaryKey" json:"id"`
 		Name            string
 		FullName        string
 		Tax             float32
@@ -43,7 +43,7 @@ type (
 	}
 
 	Country struct {
-		ID          uint `gorm:"primaryKey" json:"-"`
+		ID          uint `gorm:"primaryKey" json:"id"`
 		Name        string
 		DisplayName string
 		PpCode      string

@@ -53,6 +53,28 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/countries": {
+            "get": {
+                "description": "Get List of ` + "`" + `Country` + "`" + `es by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "utility"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/address.Country"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/login": {
             "post": {
                 "consumes": [
@@ -333,6 +355,28 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/states": {
+            "get": {
+                "description": "Get List of ` + "`" + `States` + "`" + `es by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "utility"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/address.State"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -496,6 +540,9 @@ const docTemplate = `{
                 "displayName": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -512,6 +559,9 @@ const docTemplate = `{
             "properties": {
                 "fullName": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "info": {
                     "type": "string"
