@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	l "log"
 	"os"
 
 	"pex-universe/internal/database"
@@ -11,8 +12,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/iancoleman/strcase"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/mysql"
+	"gorm.io/gorm/logger"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/storage/sqlite3/v2"
@@ -93,9 +95,16 @@ func New() *FiberServer {
 	db := database.New()
 	db.MapperFunc(strcase.ToSnake)
 
+	gormLogger := logger.New(
+		l.New(os.Stdout, "\r\n", l.LstdFlags),
+		logger.Config{
+			LogLevel: logger.Info,
+		},
+	)
+
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn: db.DB,
-	}))
+	}), &gorm.Config{Logger: gormLogger})
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -2,12 +2,12 @@ package routes
 
 import (
 	"fmt"
-	"time"
 
 	"pex-universe/model/user"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
+	"gorm.io/gorm"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -46,7 +46,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 	count := 0
 
 	// Ignore errors here, only checking existence
-	s.OldDB.QueryRow(`SELECT COUNT(*) as count FROM users WHERE email = ?`, u.Email).Scan(&count)
+	s.DB.Raw(`SELECT COUNT(*) FROM users WHERE email = ?`, u.Email).Scan(&count)
 
 	if count > 0 {
 		return &fiber.Error{
@@ -62,24 +62,15 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err = s.OldDB.Exec(`
-		INSERT INTO
-			users (name, email, password, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?);`,
-		u.Name,
-		u.Email,
-		hashedPassword,
-		time.Now(),
-		time.Now())
-	if err != nil {
-		return err
+	newUser := user.User{
+		Name:     u.Name,
+		Email:    u.Email,
+		Password: string(hashedPassword),
 	}
 
-	newUser := new(user.User)
-
-	err = s.OldDB.Get(newUser, `SELECT * FROM users WHERE email = ?`, u.Email)
+	err = s.DB.Create(&newUser).Error
 	if err != nil {
-		return fiber.NewError(400, err.Error())
+		return err
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(newUser)
@@ -108,11 +99,16 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	user := new(user.User)
+	user := user.User{}
 
-	err = s.OldDB.Get(user, `SELECT * FROM users WHERE email = ?;`, u.Email)
-	if err != nil {
+	err = s.DB.Where("email = ?", u.Email).First(&user).Error
+
+	if err == gorm.ErrRecordNotFound {
 		return fiber.NewError(404, fmt.Sprintf("User with email `%s` was not found.", u.Email))
+	}
+
+	if err != nil {
+		return err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(u.Password))
@@ -130,9 +126,10 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 	sess.Regenerate()
 	defer sess.Save()
 
-	newToken := sess.ID()
+	*user.RememberToken = sess.ID()
 
-	_, err = s.OldDB.Exec(`UPDATE users SET remember_token = ? WHERE id = ?;`, newToken, user.Id)
+	s.DB.Save(&user)
+
 	if err != nil {
 		return err
 	}
@@ -151,7 +148,15 @@ func (s *Controller) logoutPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	s.OldDB.Exec(`UPDATE users SET remember_token = 'NULL' WHERE remember_token = ?;`, sess.ID())
+	token := sess.ID()
+
+	err = s.DB.
+		Model(&user.User{}).
+		Where(&user.User{RememberToken: &token}).
+		Update("remember_token", "NULL").Error
+	if err != nil {
+		return err
+	}
 
 	sess.Destroy()
 	defer sess.Save()

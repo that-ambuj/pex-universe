@@ -186,6 +186,17 @@ const docTemplate = `{
                 "tags": [
                     "profile"
                 ],
+                "parameters": [
+                    {
+                        "description": "Request Body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/address.AddressCreateDto"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -198,7 +209,7 @@ const docTemplate = `{
         },
         "/v1/profile/addresses/{id}": {
             "get": {
-                "description": "Get ` + "`" + `Address` + "`" + ` Info By Id",
+                "description": "Get ` + "`" + `Address` + "`" + ` Info By ID",
                 "produces": [
                     "application/json"
                 ],
@@ -346,6 +357,47 @@ const docTemplate = `{
                 }
             }
         },
+        "address.AddressCreateDto": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "company": {
+                    "type": "string"
+                },
+                "countryID": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "ext": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "stateID": {
+                    "type": "integer"
+                },
+                "streetAddress1": {
+                    "type": "string"
+                },
+                "streetAddress2": {
+                    "type": "string"
+                },
+                "zip": {
+                    "type": "string"
+                }
+            }
+        },
         "address.AddressUpdateDto": {
             "type": "object",
             "properties": {
@@ -366,9 +418,6 @@ const docTemplate = `{
                 },
                 "firstName": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "lastName": {
                     "type": "string"
@@ -470,7 +519,7 @@ const docTemplate = `{
                         "$ref": "#/definitions/address.Address"
                     }
                 },
-                "created_at": {
+                "createdAt": {
                     "type": "string"
                 },
                 "email": {
@@ -482,7 +531,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "updated_at": {
+                "updatedAt": {
                     "type": "string"
                 }
             }
