@@ -6,6 +6,7 @@ import (
 	"pex-universe/model/user"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"gorm.io/gorm"
 
@@ -40,6 +41,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 
 	err = s.ValidateStruct(u)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -59,6 +61,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 
 	hashedPassword, err = bcrypt.GenerateFromPassword([]byte(u.Password), 10)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -70,6 +73,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 
 	err = s.DB.Create(&newUser).Error
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -96,6 +100,7 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 
 	err = s.ValidateStruct(u)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -108,11 +113,13 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 	}
 
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(u.Password))
 	if err != nil {
+		log.Error(err)
 		return fiber.NewError(fiber.ErrUnauthorized.Code, "Wrong Password")
 	}
 
@@ -120,6 +127,7 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 
 	sess, err = s.Store.Get(c)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -131,6 +139,7 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 	s.DB.Save(&user)
 
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -145,6 +154,7 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 func (s *Controller) logoutPost(c *fiber.Ctx) error {
 	sess, err := s.Store.Get(c)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -155,6 +165,7 @@ func (s *Controller) logoutPost(c *fiber.Ctx) error {
 		Where(&user.User{RememberToken: &token}).
 		Update("remember_token", "NULL").Error
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 

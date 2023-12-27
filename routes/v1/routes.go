@@ -21,7 +21,9 @@ import (
 type Controller server.FiberServer
 
 func (s *Controller) RegisterRoutes() {
-	s.Get("/swagger/*", swagger.HandlerDefault)
+	s.Get("/swagger/*", swagger.New(swagger.Config{
+		TryItOutEnabled: true,
+	}))
 
 	s.Get("/hello", s.HelloWorldHandler)
 	s.Get("/health", s.healthHandler)
@@ -79,7 +81,7 @@ func (s *Controller) ValidateStruct(data interface{}) error {
 			}
 
 			errMsgs = append(errMsgs, fmt.Sprintf(
-				"%s has failed the constraint: %s (value: '%v')",
+				"'%s' has failed the constraint: %s (value: '%v')",
 				field,
 				tag,
 				val,
@@ -88,7 +90,7 @@ func (s *Controller) ValidateStruct(data interface{}) error {
 
 		return &fiber.Error{
 			Code:    fiber.ErrBadRequest.Code,
-			Message: strings.Join(errMsgs, " and "),
+			Message: strings.Join(errMsgs, ", "),
 		}
 	}
 
@@ -123,6 +125,7 @@ func (s *Controller) HelloWorldHandler(c *fiber.Ctx) error {
 func (s *Controller) healthHandler(c *fiber.Ctx) error {
 	db, err := s.DB.DB()
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
