@@ -103,7 +103,9 @@ func New() *FiberServer {
 
 	if env != "test" {
 		app.Hooks().OnRoute(func(r fiber.Route) error {
-			fmt.Printf("Mapped Route: [%s] %s\n", r.Method, r.Path)
+			if r.Method != "HEAD" && r.Path != "/v1/*" {
+				fmt.Printf("Mapped Route: [%s] %s\n", r.Method, r.Path)
+			}
 
 			return nil
 		})
