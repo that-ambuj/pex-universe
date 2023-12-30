@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"math"
+	"pex-universe/model"
 	"pex-universe/model/address"
 	"pex-universe/model/user"
 	"strconv"
@@ -78,10 +79,8 @@ func (s *Controller) profilePut(c *fiber.Ctx) error {
 }
 
 type AddressesResponse struct {
-	Data        []address.Address
-	CurrentPage int
-	TotalPages  int
-	Count       int
+	Data []address.Address
+	model.PageResponse
 }
 
 // addressGet
@@ -119,10 +118,12 @@ func (s *Controller) addressGet(c *fiber.Ctx) error {
 	totalPages := int(math.Ceil(float64(count) / float64(limit)))
 
 	return c.JSON(AddressesResponse{
-		Data:        addrs,
-		CurrentPage: page,
-		TotalPages:  totalPages,
-		Count:       int(count),
+		Data: addrs,
+		PageResponse: model.PageResponse{
+			CurrentPage: page,
+			TotalPages:  totalPages,
+			Count:       int(count),
+		},
 	})
 }
 
@@ -165,7 +166,7 @@ func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(addr)
+	return c.JSON(&addr)
 }
 
 // addressPost

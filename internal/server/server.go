@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/log"
 
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -43,8 +42,6 @@ type ErrorResp struct {
 }
 
 func ErrorHandler(c *fiber.Ctx, err error) error {
-	log.Error(err)
-
 	switch t := err.(type) {
 	case *fiber.Error:
 		return c.Status(t.Code).JSON(ErrorResp{

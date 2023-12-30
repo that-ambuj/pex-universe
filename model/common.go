@@ -20,6 +20,12 @@ func (p *PaginationDto) Skip() int {
 	return (p.Page - 1) * p.Limit
 }
 
+type PageResponse struct {
+	CurrentPage int
+	TotalPages  int
+	Count       int
+}
+
 type PaginatedResponse struct {
 	Data        interface{}
 	CurrentPage int

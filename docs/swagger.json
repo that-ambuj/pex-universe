@@ -45,6 +45,100 @@
                 }
             }
         },
+        "/v1/categories": {
+            "get": {
+                "description": "Get List of `Categories`",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "limit of results",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/routes.CategoriesResp"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/categories/{id}": {
+            "get": {
+                "description": "Get `Category` Info By ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/product.Category"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/categories/{id}/children": {
+            "get": {
+                "description": "Get List of `Categories` as Children of a `Category` with ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/product.Category"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/countries": {
             "get": {
                 "description": "Get List of `Country`es by ID",
@@ -583,6 +677,83 @@
                 }
             }
         },
+        "product.Category": {
+            "type": "object",
+            "properties": {
+                "brandAttributeCollapsed": {
+                    "type": "boolean"
+                },
+                "brandAttributeEnabled": {
+                    "type": "boolean"
+                },
+                "buttonContent": {
+                    "type": "string"
+                },
+                "buttonEnable": {
+                    "type": "boolean"
+                },
+                "buttonTitle": {
+                    "type": "string"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.Category"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "customCategory": {
+                    "type": "boolean"
+                },
+                "defaultSorting": {
+                    "type": "boolean"
+                },
+                "displayTitle": {
+                    "type": "string"
+                },
+                "firstDescription": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "metaDescription": {
+                    "type": "string"
+                },
+                "metaTitle": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "priceAttributeCollapsed": {
+                    "type": "boolean"
+                },
+                "priceAttributeEnabled": {
+                    "type": "boolean"
+                },
+                "published": {
+                    "type": "boolean"
+                },
+                "secondDescription": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "routes.AddressesResponse": {
             "type": "object",
             "properties": {
@@ -596,6 +767,26 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/address.Address"
+                    }
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.CategoriesResp": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "currentPage": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.Category"
                     }
                 },
                 "totalPages": {

@@ -147,6 +147,57 @@ definitions:
         example: false
         type: boolean
     type: object
+  product.Category:
+    properties:
+      brandAttributeCollapsed:
+        type: boolean
+      brandAttributeEnabled:
+        type: boolean
+      buttonContent:
+        type: string
+      buttonEnable:
+        type: boolean
+      buttonTitle:
+        type: string
+      children:
+        items:
+          $ref: '#/definitions/product.Category'
+        type: array
+      createdAt:
+        type: string
+      customCategory:
+        type: boolean
+      defaultSorting:
+        type: boolean
+      displayTitle:
+        type: string
+      firstDescription:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      metaDescription:
+        type: string
+      metaTitle:
+        type: string
+      position:
+        type: integer
+      priceAttributeCollapsed:
+        type: boolean
+      priceAttributeEnabled:
+        type: boolean
+      published:
+        type: boolean
+      secondDescription:
+        type: string
+      slug:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   routes.AddressesResponse:
     properties:
       count:
@@ -156,6 +207,19 @@ definitions:
       data:
         items:
           $ref: '#/definitions/address.Address'
+        type: array
+      totalPages:
+        type: integer
+    type: object
+  routes.CategoriesResp:
+    properties:
+      count:
+        type: integer
+      currentPage:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/product.Category'
         type: array
       totalPages:
         type: integer
@@ -249,6 +313,67 @@ paths:
       summary: Hello World
       tags:
       - default
+  /v1/categories:
+    get:
+      description: Get List of `Categories`
+      parameters:
+      - default: 1
+        description: page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: limit of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/routes.CategoriesResp'
+            type: array
+      tags:
+      - products
+  /v1/categories/{id}:
+    get:
+      description: Get `Category` Info By ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/product.Category'
+      tags:
+      - products
+  /v1/categories/{id}/children:
+    get:
+      description: Get List of `Categories` as Children of a `Category` with ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/product.Category'
+      tags:
+      - products
   /v1/countries:
     get:
       description: Get List of `Country`es by ID

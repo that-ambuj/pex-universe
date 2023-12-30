@@ -28,12 +28,15 @@ func (s *Controller) RegisterRoutes() {
 	s.Get("/hello", s.HelloWorldHandler)
 	s.Get("/health", s.healthHandler)
 
-	s.RegisterUtilRoutes()
 	s.RegisterAuthRoutes()
+	s.RegisterUtilRoutes()
+	s.RegisterCategoryRoutes()
+	s.RegisterOrderOpenRoutes()
 
 	s.Use("/v1/*", s.UserAuthMiddleware)
 
 	s.RegisterProfileRoutes()
+	s.RegisterOrderAuthorisedRoutes()
 }
 
 func (s *Controller) UserAuthMiddleware(c *fiber.Ctx) error {
