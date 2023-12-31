@@ -31,6 +31,7 @@ func (s *Controller) RegisterRoutes() {
 	s.RegisterAuthRoutes()
 	s.RegisterUtilRoutes()
 	s.RegisterCategoryRoutes()
+	s.RegisterProductRoutes()
 	s.RegisterOrderOpenRoutes()
 
 	s.Use("/v1/*", s.UserAuthMiddleware)
