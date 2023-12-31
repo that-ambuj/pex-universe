@@ -26,12 +26,6 @@ type PageResponse struct {
 	Count       int
 }
 
-type PaginatedResponse struct {
-	Data        interface{}
-	CurrentPage int
-	TotalPages  int
-}
-
 type ErrorResponse struct {
 	Success bool   `example:"false"`
 	Status  uint   `example:"400"`
