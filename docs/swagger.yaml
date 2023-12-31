@@ -198,6 +198,171 @@ definitions:
       updatedAt:
         type: string
     type: object
+  product.Manufacturer:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      logo:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  product.Product:
+    properties:
+      application:
+        type: string
+      caPropWarning:
+        type: boolean
+      createdAt:
+        type: string
+      crossRef:
+        type: string
+      customLabel:
+        type: string
+      declareValue:
+        type: boolean
+      description:
+        type: string
+      discontinued:
+        type: boolean
+      discontinuedReplacement:
+        type: string
+      discountDeadline:
+        type: string
+      discountPrice:
+        type: number
+      discountStartDate:
+        type: string
+      documentation:
+        type: string
+      faqGroupLabel:
+        type: string
+      features:
+        type: string
+      fluid:
+        type: boolean
+      freeShipping:
+        type: boolean
+      freightOnly:
+        type: boolean
+      height:
+        type: number
+      hideManufacturer:
+        type: boolean
+      id:
+        type: integer
+      images:
+        items:
+          $ref: '#/definitions/product.ProductImage'
+        type: array
+      inStockAtSupplier:
+        type: boolean
+      length:
+        type: number
+      listPostion:
+        type: integer
+      lwhUnit:
+        type: string
+      madeInUsa:
+        type: boolean
+      manufacturer:
+        allOf:
+        - $ref: '#/definitions/product.Manufacturer'
+        description: Joins
+      metaDescription:
+        type: string
+      metaTitle:
+        type: string
+      model:
+        type: string
+      nonPickup:
+        type: boolean
+      notLeadFree:
+        type: boolean
+      note:
+        type: string
+      partNumber:
+        type: string
+      pickupDiscount:
+        type: number
+      pickupOnly:
+        type: boolean
+      pickupPrice:
+        type: number
+      possibleFraud:
+        type: boolean
+      pricePerFoot:
+        type: number
+      priceRangeId:
+        type: integer
+      published:
+        type: boolean
+      replacement:
+        type: string
+      reviewGroupLabel:
+        type: string
+      sellPrice:
+        type: number
+      sellQty:
+        type: integer
+      shelfIdExtra:
+        type: string
+      shipDedicatedBox:
+        type: integer
+      shipSelfPackaging:
+        type: boolean
+      shipSeparately:
+        type: boolean
+      showMapPrice:
+        type: boolean
+      slug:
+        type: string
+      specOrder:
+        type: boolean
+      stockQuantity:
+        type: integer
+      techSpecs:
+        type: string
+      temporaryUnavailable:
+        type: boolean
+      title:
+        type: string
+      upc:
+        type: string
+      updatedAt:
+        type: string
+      usuallyShips:
+        type: string
+      warranty:
+        type: string
+      weight:
+        type: number
+      weightUnits:
+        type: string
+      width:
+        type: number
+    type: object
+  product.ProductImage:
+    properties:
+      createdAt:
+        type: string
+      delete:
+        type: boolean
+      id:
+        type: integer
+      position:
+        type: integer
+      src:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   routes.AddressesResponse:
     properties:
       count:
@@ -228,6 +393,30 @@ definitions:
     properties:
       message:
         type: string
+    type: object
+  routes.HomePageResp:
+    properties:
+      brands:
+        items:
+          $ref: '#/definitions/product.Manufacturer'
+        type: array
+      categories:
+        items:
+          $ref: '#/definitions/product.Category'
+        type: array
+    type: object
+  routes.ProductsResp:
+    properties:
+      count:
+        type: integer
+      currentPage:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/product.Product'
+        type: array
+      totalPages:
+        type: integer
     type: object
   routes.ProfileUpdateDto:
     properties:
@@ -388,6 +577,17 @@ paths:
             type: array
       tags:
       - utility
+  /v1/home-page:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.HomePageResp'
+      tags:
+      - homepage
   /v1/login:
     post:
       consumes:
@@ -414,6 +614,49 @@ paths:
       summary: Log out of the current session
       tags:
       - auth
+  /v1/products:
+    get:
+      parameters:
+      - description: Category ID
+        in: query
+        name: category_id
+        type: integer
+      - default: 1
+        description: page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: limit of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ProductsResp'
+      tags:
+      - products
+  /v1/products/{id}:
+    get:
+      parameters:
+      - description: Product ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/product.Product'
+      tags:
+      - products
   /v1/profile:
     get:
       produces:

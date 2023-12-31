@@ -169,6 +169,24 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/home-page": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "homepage"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.HomePageResp"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/login": {
             "post": {
                 "consumes": [
@@ -208,6 +226,73 @@ const docTemplate = `{
                 ],
                 "summary": "Log out of the current session",
                 "responses": {}
+            }
+        },
+        "/v1/products": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Category ID",
+                        "name": "category_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "limit of results",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ProductsResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/products/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/product.Product"
+                        }
+                    }
+                }
             }
         },
         "/v1/profile": {
@@ -762,6 +847,257 @@ const docTemplate = `{
                 }
             }
         },
+        "product.Manufacturer": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "product.Product": {
+            "type": "object",
+            "properties": {
+                "application": {
+                    "type": "string"
+                },
+                "caPropWarning": {
+                    "type": "boolean"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "crossRef": {
+                    "type": "string"
+                },
+                "customLabel": {
+                    "type": "string"
+                },
+                "declareValue": {
+                    "type": "boolean"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "discontinued": {
+                    "type": "boolean"
+                },
+                "discontinuedReplacement": {
+                    "type": "string"
+                },
+                "discountDeadline": {
+                    "type": "string"
+                },
+                "discountPrice": {
+                    "type": "number"
+                },
+                "discountStartDate": {
+                    "type": "string"
+                },
+                "documentation": {
+                    "type": "string"
+                },
+                "faqGroupLabel": {
+                    "type": "string"
+                },
+                "features": {
+                    "type": "string"
+                },
+                "fluid": {
+                    "type": "boolean"
+                },
+                "freeShipping": {
+                    "type": "boolean"
+                },
+                "freightOnly": {
+                    "type": "boolean"
+                },
+                "height": {
+                    "type": "number"
+                },
+                "hideManufacturer": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.ProductImage"
+                    }
+                },
+                "inStockAtSupplier": {
+                    "type": "boolean"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "listPostion": {
+                    "type": "integer"
+                },
+                "lwhUnit": {
+                    "type": "string"
+                },
+                "madeInUsa": {
+                    "type": "boolean"
+                },
+                "manufacturer": {
+                    "description": "Joins",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/product.Manufacturer"
+                        }
+                    ]
+                },
+                "metaDescription": {
+                    "type": "string"
+                },
+                "metaTitle": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "nonPickup": {
+                    "type": "boolean"
+                },
+                "notLeadFree": {
+                    "type": "boolean"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "partNumber": {
+                    "type": "string"
+                },
+                "pickupDiscount": {
+                    "type": "number"
+                },
+                "pickupOnly": {
+                    "type": "boolean"
+                },
+                "pickupPrice": {
+                    "type": "number"
+                },
+                "possibleFraud": {
+                    "type": "boolean"
+                },
+                "pricePerFoot": {
+                    "type": "number"
+                },
+                "priceRangeId": {
+                    "type": "integer"
+                },
+                "published": {
+                    "type": "boolean"
+                },
+                "replacement": {
+                    "type": "string"
+                },
+                "reviewGroupLabel": {
+                    "type": "string"
+                },
+                "sellPrice": {
+                    "type": "number"
+                },
+                "sellQty": {
+                    "type": "integer"
+                },
+                "shelfIdExtra": {
+                    "type": "string"
+                },
+                "shipDedicatedBox": {
+                    "type": "integer"
+                },
+                "shipSelfPackaging": {
+                    "type": "boolean"
+                },
+                "shipSeparately": {
+                    "type": "boolean"
+                },
+                "showMapPrice": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "specOrder": {
+                    "type": "boolean"
+                },
+                "stockQuantity": {
+                    "type": "integer"
+                },
+                "techSpecs": {
+                    "type": "string"
+                },
+                "temporaryUnavailable": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "upc": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "usuallyShips": {
+                    "type": "string"
+                },
+                "warranty": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "number"
+                },
+                "weightUnits": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "number"
+                }
+            }
+        },
+        "product.ProductImage": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "delete": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "src": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "routes.AddressesResponse": {
             "type": "object",
             "properties": {
@@ -807,6 +1143,43 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "routes.HomePageResp": {
+            "type": "object",
+            "properties": {
+                "brands": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.Manufacturer"
+                    }
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.Category"
+                    }
+                }
+            }
+        },
+        "routes.ProductsResp": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "currentPage": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.Product"
+                    }
+                },
+                "totalPages": {
+                    "type": "integer"
                 }
             }
         },
