@@ -17,7 +17,7 @@ docker-run:
 		: ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
-		docker-compose up; \
+		docker-compose up -d; \
 	fi
 
 # Shutdown DB container
