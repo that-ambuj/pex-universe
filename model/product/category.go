@@ -34,6 +34,7 @@ type Category struct {
 	CreatedAt               *time.Time
 	UpdatedAt               *time.Time
 	Children                []Category `gorm:"many2many:category_children"`
+	Products                []Product  `gorm:"many2many:products_categories" json:"-"`
 }
 
 var categoryImagePrefix = "https://pexuniverse.com/uploads/categories/"
