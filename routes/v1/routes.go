@@ -30,6 +30,7 @@ func (s *Controller) RegisterRoutes() {
 
 	s.RegisterAuthRoutes()
 	s.RegisterUtilRoutes()
+	s.RegisterHomeRoutes()
 	s.RegisterCategoryRoutes()
 	s.RegisterProductRoutes()
 	s.RegisterOrderOpenRoutes()
