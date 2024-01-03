@@ -243,6 +243,10 @@ definitions:
         type: string
       faqGroupLabel:
         type: string
+      faqs:
+        items:
+          $ref: '#/definitions/product.ProductFaq'
+        type: array
       features:
         type: string
       fluid:
@@ -265,7 +269,7 @@ definitions:
         type: boolean
       length:
         type: number
-      listPostion:
+      listPosition:
         type: integer
       lwhUnit:
         type: string
@@ -303,10 +307,18 @@ definitions:
         type: integer
       published:
         type: boolean
+      relatedProducts:
+        items:
+          $ref: '#/definitions/product.Product'
+        type: array
       replacement:
         type: string
       reviewGroupLabel:
         type: string
+      reviews:
+        items:
+          $ref: '#/definitions/product.ProductReview'
+        type: array
       sellPrice:
         type: number
       sellQty:
@@ -348,17 +360,82 @@ definitions:
       width:
         type: number
     type: object
+  product.ProductFaq:
+    properties:
+      answer:
+        type: string
+      answered:
+        type: string
+      createdAt:
+        type: string
+      emailed:
+        type: boolean
+      forCustomerService:
+        type: boolean
+      id:
+        type: integer
+      name:
+        type: string
+      published:
+        type: boolean
+      question:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   product.ProductImage:
     properties:
       createdAt:
         type: string
-      delete:
-        type: boolean
       id:
         type: integer
       position:
         type: integer
       src:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  product.ProductReview:
+    properties:
+      contents:
+        allOf:
+        - $ref: '#/definitions/product.ProductReviewContent'
+        description: Joins
+      createdAt:
+        type: string
+      fromEmail:
+        type: boolean
+      id:
+        type: integer
+      published:
+        type: boolean
+      rating:
+        type: integer
+      reasonNotApproved:
+        type: string
+      updatedAt:
+        type: string
+      verified:
+        type: boolean
+    type: object
+  product.ProductReviewContent:
+    properties:
+      comment:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      originalText:
+        type: string
+      reply:
+        type: string
+      title:
         type: string
       updatedAt:
         type: string

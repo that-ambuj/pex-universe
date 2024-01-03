@@ -915,6 +915,12 @@ const docTemplate = `{
                 "faqGroupLabel": {
                     "type": "string"
                 },
+                "faqs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.ProductFaq"
+                    }
+                },
                 "features": {
                     "type": "string"
                 },
@@ -948,7 +954,7 @@ const docTemplate = `{
                 "length": {
                     "type": "number"
                 },
-                "listPostion": {
+                "listPosition": {
                     "type": "integer"
                 },
                 "lwhUnit": {
@@ -1007,11 +1013,23 @@ const docTemplate = `{
                 "published": {
                     "type": "boolean"
                 },
+                "relatedProducts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.Product"
+                    }
+                },
                 "replacement": {
                     "type": "string"
                 },
                 "reviewGroupLabel": {
                     "type": "string"
+                },
+                "reviews": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.ProductReview"
+                    }
                 },
                 "sellPrice": {
                     "type": "number"
@@ -1075,14 +1093,46 @@ const docTemplate = `{
                 }
             }
         },
+        "product.ProductFaq": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "answered": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "emailed": {
+                    "type": "boolean"
+                },
+                "forCustomerService": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "published": {
+                    "type": "boolean"
+                },
+                "question": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "product.ProductImage": {
             "type": "object",
             "properties": {
                 "createdAt": {
                     "type": "string"
-                },
-                "delete": {
-                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
@@ -1091,6 +1141,75 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "src": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "product.ProductReview": {
+            "type": "object",
+            "properties": {
+                "contents": {
+                    "description": "Joins",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/product.ProductReviewContent"
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "fromEmail": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "published": {
+                    "type": "boolean"
+                },
+                "rating": {
+                    "type": "integer"
+                },
+                "reasonNotApproved": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "verified": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "product.ProductReviewContent": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "originalText": {
+                    "type": "string"
+                },
+                "reply": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "updatedAt": {
