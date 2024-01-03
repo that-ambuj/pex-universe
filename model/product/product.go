@@ -83,7 +83,8 @@ type Product struct {
 	Images          []ProductImage
 	Reviews         []ProductReview
 	Faqs            []ProductFaq
-	RelatedProducts []Product `gorm:"many2many:product_related;"`
+	RelatedProducts []Product        `gorm:"many2many:product_related;"`
+	ShippingMethods []ShippingMethod `gorm:"many2many:product_shipping_methods;"`
 }
 
 type ProductImage struct {
