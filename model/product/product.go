@@ -37,7 +37,7 @@ type Product struct {
 	Width                   float32
 	Height                  float32
 	LwhUnit                 string
-	ListPostion             int
+	ListPosition            int
 	UsuallyShips            string
 	FreeShipping            bool
 	StockQuantity           int
@@ -79,8 +79,11 @@ type Product struct {
 	ReviewGroupID  *uint   `json:"-"`
 	FaqGroupId     *uint   `json:"-"`
 	// Joins
-	Manufacturer Manufacturer
-	Images       []ProductImage
+	Manufacturer    *Manufacturer
+	Images          []ProductImage
+	Reviews         []ProductReview
+	Faqs            []ProductFaq
+	RelatedProducts []Product `gorm:"many2many:product_related;"`
 }
 
 type ProductImage struct {
@@ -90,7 +93,7 @@ type ProductImage struct {
 	Position  int
 	CreatedAt *time.Time
 	UpdatedAt *time.Time
-	Delete    bool
+	Delete    bool `json:"-"`
 }
 
 var productImageTemp = "https://pexuniverse.com/uploads/products/{{- .PartNumber -}}/images/458x458/{{- .Image -}}"
@@ -107,6 +110,13 @@ func (p *Product) AfterFind(tx *gorm.DB) error {
 	}
 
 	for idx, image := range p.Images {
+
+		if image.Delete {
+			// Delete the current image
+			p.Images = append(p.Images[:idx], p.Images[idx+1:]...)
+			continue
+		}
+
 		if image.Src == "" {
 			continue
 		}
