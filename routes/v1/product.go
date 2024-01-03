@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func (s *Controller) RegisterProductRoutes() {
@@ -90,13 +91,19 @@ func (s *Controller) productByIdGet(c *fiber.Ctx) error {
 	p := product.Product{}
 
 	err = s.DB.
-		Preload("Images").
-		Preload("Manufacturer").
+		Preload(clause.Associations).
+		Preload("Reviews.Contents").
 		Where(&product.Product{ID: uint(id)}).
 		First(&p).Error
 
 	if err == gorm.ErrRecordNotFound {
-		return fiber.NewError(404, fmt.Sprintf("Product with ID: %d does not exists", id))
+		return fiber.NewError(404,
+			fmt.Sprintf("Product with ID: %d does not exists", id))
+	}
+
+	if !p.Published {
+		return fiber.NewError(403,
+			fmt.Sprintf("Product with ID: %d is not allowed to be accessed by the current user.", p.ID))
 	}
 
 	if err != nil {
