@@ -43,17 +43,15 @@ func (s *Controller) productsGet(c *fiber.Ctx) error {
 	limit := c.QueryInt("limit", 10)
 
 	products := []product.Product{}
-	count := int64(0)
 
-	err := s.DB.
-		Where("id IN (?)", s.DB.
-			Table("products_categories").
-			Where("category_id = ?", categoryId).
-			Select("product_id"),
-		).
-		Find(&products).
-		Count(&count).
-		Error
+	assoc := s.DB.
+		Model(&product.Category{ID: uint(categoryId)}).
+		Limit(limit).
+		Offset((page - 1) * limit).
+		Association("Products")
+
+	count := assoc.Count()
+	err := assoc.Find(&products)
 
 	if err != nil {
 		log.Error(err)
@@ -91,6 +89,8 @@ func (s *Controller) productByIdGet(c *fiber.Ctx) error {
 	p := product.Product{}
 
 	err = s.DB.
+		Preload("ShippingMethods",
+			s.DB.Where(&product.ShippingMethod{Active: true})).
 		Preload(clause.Associations).
 		Preload("Reviews.Contents").
 		Where(&product.Product{ID: uint(id)}).
