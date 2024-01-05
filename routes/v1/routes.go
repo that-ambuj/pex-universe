@@ -38,6 +38,7 @@ func (s *Controller) RegisterRoutes() {
 	s.Use("/v1/*", s.UserAuthMiddleware)
 
 	s.RegisterProfileRoutes()
+	s.RegisterAddressRoutes()
 	s.RegisterOrderAuthorisedRoutes()
 }
 
