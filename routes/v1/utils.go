@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"pex-universe/model/address"
+	"pex-universe/model/user"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
@@ -22,7 +22,7 @@ func (s *Controller) RegisterUtilRoutes() {
 //	@Success		200	{array}	address.State
 //	@Router			/v1/states [get]
 func (s *Controller) statesGet(c *fiber.Ctx) error {
-	states := []address.State{}
+	states := []user.State{}
 
 	err := s.DB.Find(&states).Error
 	if err != nil {
@@ -42,7 +42,7 @@ func (s *Controller) statesGet(c *fiber.Ctx) error {
 //	@Success		200	{array}	address.Country
 //	@Router			/v1/countries [get]
 func (s *Controller) countriesGet(c *fiber.Ctx) error {
-	countries := []address.Country{}
+	countries := []user.Country{}
 
 	err := s.DB.Find(&countries).Error
 	if err != nil {

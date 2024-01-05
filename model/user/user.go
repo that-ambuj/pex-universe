@@ -1,7 +1,6 @@
 package user
 
 import (
-	"pex-universe/model/address"
 	"time"
 )
 
@@ -14,8 +13,9 @@ type (
 		RememberToken *string `json:"-"`
 		CreatedAt     time.Time
 		UpdatedAt     time.Time
-
-		Addresses []address.Address
+		// Joins
+		Addresses []Address
+		Cards     []UserSavedCard
 	}
 
 	UserLoginDto struct {

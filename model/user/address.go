@@ -1,4 +1,4 @@
-package address
+package user
 
 import (
 	"time"

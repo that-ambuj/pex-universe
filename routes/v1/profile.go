@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"pex-universe/model"
-	"pex-universe/model/address"
 	"pex-universe/model/user"
 	"strconv"
 
@@ -79,7 +78,7 @@ func (s *Controller) profilePut(c *fiber.Ctx) error {
 }
 
 type AddressesResponse struct {
-	Data []address.Address
+	Data []user.Address
 	model.PageResponse
 }
 
@@ -93,18 +92,18 @@ type AddressesResponse struct {
 //	@Success		200		{array}	AddressesResponse
 //	@Router			/v1/profile/addresses [get]
 func (s *Controller) addressGet(c *fiber.Ctx) error {
-	user := c.Locals("user").(user.User)
+	u := c.Locals("user").(user.User)
 
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
 
-	addrs := []address.Address{}
+	addrs := []user.Address{}
 	count := int64(0)
 
 	err := s.DB.
 		Joins("State").
 		Joins("Country").
-		Where(&address.Address{UserID: user.ID}).
+		Where(&user.Address{UserID: u.ID}).
 		Limit(limit).
 		Offset((page - 1) * limit).
 		Find(&addrs).
@@ -144,12 +143,12 @@ func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	addr := address.Address{}
+	addr := user.Address{}
 
 	err = s.DB.
 		Joins("State").
 		Joins("Country").
-		Where(&address.Address{
+		Where(&user.Address{
 			ID:     uint(id),
 			UserID: u.ID,
 		}).
@@ -179,9 +178,9 @@ func (s *Controller) addressByIdGet(c *fiber.Ctx) error {
 //	@Failure		400		{object}	model.ErrorResponse
 //	@Router			/v1/profile/addresses [post]
 func (s *Controller) addressPost(c *fiber.Ctx) error {
-	user := c.Locals("user").(user.User)
+	u := c.Locals("user").(user.User)
 
-	dto := address.AddressCreateDto{}
+	dto := user.AddressCreateDto{}
 
 	err := c.BodyParser(&dto)
 	if err != nil {
@@ -194,9 +193,9 @@ func (s *Controller) addressPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	dto.UserID = user.ID
+	dto.UserID = u.ID
 
-	addr := address.Address{
+	addr := user.Address{
 		FirstName:      dto.FirstName,
 		LastName:       dto.LastName,
 		Company:        dto.Company,
@@ -209,7 +208,7 @@ func (s *Controller) addressPost(c *fiber.Ctx) error {
 		Email:          dto.Email,
 		StateID:        dto.StateID,
 		CountryID:      dto.CountryID,
-		UserID:         user.ID,
+		UserID:         u.ID,
 	}
 
 	err = s.DB.Create(&addr).Error
@@ -231,14 +230,14 @@ func (s *Controller) addressPost(c *fiber.Ctx) error {
 //	@Success		200		{object}	address.Address
 //	@Router			/v1/profile/addresses/{id} [put]
 func (s *Controller) addressByIdPut(c *fiber.Ctx) error {
-	user := c.Locals("user").(user.User)
+	u := c.Locals("user").(user.User)
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return fiber.NewError(400, err.Error())
 	}
 
-	dto := address.AddressUpdateDto{}
+	dto := user.AddressUpdateDto{}
 
 	err = c.BodyParser(&dto)
 	if err != nil {
@@ -251,7 +250,7 @@ func (s *Controller) addressByIdPut(c *fiber.Ctx) error {
 		return err
 	}
 
-	addr := address.Address{ID: uint(id), UserID: user.ID}
+	addr := user.Address{ID: uint(id), UserID: u.ID}
 
 	err = s.DB.Model(&addr).Updates(dto).Error
 	if err != nil {
@@ -275,16 +274,16 @@ func (s *Controller) addressByIdPut(c *fiber.Ctx) error {
 //	@Success		200							{object}	address.Address
 //	@Router			/v1/profile/addresses/{id} 	[delete]
 func (s *Controller) addressByIdDelete(c *fiber.Ctx) error {
-	user := c.Locals("user").(user.User)
+	u := c.Locals("user").(user.User)
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return fiber.NewError(400, err.Error())
 	}
 
-	addr := address.Address{
+	addr := user.Address{
 		ID:     uint(id),
-		UserID: user.ID,
+		UserID: u.ID,
 	}
 
 	res := s.DB.Where(&addr).Delete(&addr)
