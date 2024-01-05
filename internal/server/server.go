@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
@@ -81,7 +82,7 @@ func New() *FiberServer {
 
 	app.Use(fiberLogger.New())
 	app.Use(cors.New())
-	// app.Use(helmet.New())
+	app.Use(helmet.New())
 	app.Use(limiter.New(limiter.Config{
 		SkipFailedRequests: true,
 		Next: func(c *fiber.Ctx) bool {
