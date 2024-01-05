@@ -89,11 +89,9 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 //	@Success	200		{object}	user.User
 //	@Router		/v1/login [post]
 func (s *Controller) loginPost(c *fiber.Ctx) error {
-	u := new(user.UserLoginDto)
+	u := user.UserLoginDto{}
 
-	var err error
-
-	err = c.BodyParser(&u)
+	err := c.BodyParser(&u)
 	if err != nil {
 		return fiber.NewError(400, err.Error())
 	}
@@ -108,11 +106,12 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 
 	err = s.DB.Where("email = ?", u.Email).First(&user).Error
 
-	if err == gorm.ErrRecordNotFound {
+	switch err {
+	case nil:
+		break
+	case gorm.ErrRecordNotFound:
 		return fiber.NewError(404, fmt.Sprintf("User with email `%s` was not found.", u.Email))
-	}
-
-	if err != nil {
+	default:
 		log.Error(err)
 		return err
 	}
@@ -131,19 +130,27 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	sess.Regenerate()
-	defer sess.Save()
-
-	*user.RememberToken = sess.ID()
-
-	s.DB.Save(&user)
-
+	err = sess.Regenerate()
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	return c.JSON(user)
+	err = s.DB.
+		Model(&user).
+		Update("remember_token", sess.ID()).Error
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	err = sess.Save()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return c.JSON(&user)
 }
 
 // loginPost godoc
@@ -163,7 +170,7 @@ func (s *Controller) logoutPost(c *fiber.Ctx) error {
 	err = s.DB.
 		Model(&user.User{}).
 		Where(&user.User{RememberToken: &token}).
-		Update("remember_token", "NULL").Error
+		Update("remember_token", nil).Error
 	if err != nil {
 		log.Error(err)
 		return err
