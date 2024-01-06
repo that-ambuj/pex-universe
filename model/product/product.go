@@ -83,6 +83,7 @@ type Product struct {
 	Images          []ProductImage
 	Reviews         []ProductReview
 	Faqs            []ProductFaq
+	Coupons         []*Coupon        `gorm:"many2many:coupons_products;"`
 	RelatedProducts []Product        `gorm:"many2many:product_related;"`
 	ShippingMethods []ShippingMethod `gorm:"many2many:product_shipping_methods;"`
 }
