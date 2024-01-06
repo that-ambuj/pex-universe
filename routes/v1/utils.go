@@ -19,7 +19,7 @@ func (s *Controller) RegisterUtilRoutes() {
 //	@Description	Get List of `States`es by ID
 //	@Tags			utility
 //	@Produce		json
-//	@Success		200	{array}	address.State
+//	@Success		200	{array}	user.State
 //	@Router			/v1/states [get]
 func (s *Controller) statesGet(c *fiber.Ctx) error {
 	states := []user.State{}
@@ -38,8 +38,7 @@ func (s *Controller) statesGet(c *fiber.Ctx) error {
 //	@Description	Get List of `Country`es by ID
 //	@Tags			utility
 //	@Produce		json
-//
-//	@Success		200	{array}	address.Country
+//	@Success		200	{array}	user.Country
 //	@Router			/v1/countries [get]
 func (s *Controller) countriesGet(c *fiber.Ctx) error {
 	countries := []user.Country{}
