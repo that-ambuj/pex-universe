@@ -2,7 +2,9 @@ package routes
 
 import (
 	"fmt"
+	"time"
 
+	"pex-universe/internal/errors"
 	"pex-universe/model/user"
 
 	"github.com/gofiber/fiber/v2"
@@ -36,7 +38,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 
 	err = c.BodyParser(u)
 	if err != nil {
-		return fiber.NewError(400, err.Error())
+		return errors.BadRequestErr(err)
 	}
 
 	err = s.ValidateStruct(u)
@@ -48,13 +50,11 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 	count := 0
 
 	// Ignore errors here, only checking existence
-	s.DB.Raw(`SELECT COUNT(*) FROM users WHERE email = ?`, u.Email).Scan(&count)
+	s.DB.Raw(`SELECT COUNT(*) FROM site_users WHERE email = ?`, u.Email).Scan(&count)
 
 	if count > 0 {
-		return &fiber.Error{
-			Code:    400,
-			Message: fmt.Sprintf("User with email %s already exists.", u.Email),
-		}
+		return errors.BadRequestMsg(
+			fmt.Sprintf("User with email %s already exists.", u.Email))
 	}
 
 	hashedPassword := make([]byte, 256)
@@ -66,9 +66,11 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 	}
 
 	newUser := user.User{
-		Name:     u.Name,
-		Email:    u.Email,
-		Password: string(hashedPassword),
+		Name:          u.Name,
+		Email:         u.Email,
+		Username:      u.Username,
+		Password:      string(hashedPassword),
+		RetAdLastSent: time.Now(),
 	}
 
 	err = s.DB.Create(&newUser).Error
@@ -93,10 +95,10 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 
 	err := c.BodyParser(&u)
 	if err != nil {
-		return fiber.NewError(400, err.Error())
+		return errors.BadRequestErr(err)
 	}
 
-	err = s.ValidateStruct(u)
+	err = s.ValidateStruct(&u)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -110,7 +112,7 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 	case nil:
 		break
 	case gorm.ErrRecordNotFound:
-		return fiber.NewError(404, fmt.Sprintf("User with email `%s` was not found.", u.Email))
+		return errors.NotFoundEntity("User", "email", u.Email)
 	default:
 		log.Error(err)
 		return err
@@ -119,7 +121,7 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(u.Password))
 	if err != nil {
 		log.Error(err)
-		return fiber.NewError(fiber.ErrUnauthorized.Code, "Wrong Password")
+		return errors.UnauthorizedMsg("Wrong Password")
 	}
 
 	var sess *session.Session
@@ -136,9 +138,15 @@ func (s *Controller) loginPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	err = s.DB.
-		Model(&user).
-		Update("remember_token", sess.ID()).Error
+	var (
+		token = sess.ID()
+		now   = time.Now()
+	)
+
+	user.RememberToken = &token
+	user.LastLoggedIn = &now
+
+	err = s.DB.Save(&user).Error
 	if err != nil {
 		log.Error(err)
 		return err
