@@ -5,6 +5,7 @@ import (
 	"math"
 	"pex-universe/model"
 	"pex-universe/model/product"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
@@ -89,10 +90,12 @@ func (s *Controller) productByIdGet(c *fiber.Ctx) error {
 	p := product.Product{}
 
 	err = s.DB.
+		Preload("Coupons",
+			"COALESCE(expire, ?) >= ?", time.Now(), time.Now()).
 		Preload("ShippingMethods",
 			s.DB.Where(&product.ShippingMethod{Active: true})).
-		Preload(clause.Associations).
 		Preload("Reviews.Contents").
+		Preload(clause.Associations).
 		Where(&product.Product{ID: uint(id)}).
 		First(&p).Error
 
