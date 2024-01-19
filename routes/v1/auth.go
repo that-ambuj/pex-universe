@@ -57,9 +57,7 @@ func (s *Controller) signupPost(c *fiber.Ctx) error {
 			fmt.Sprintf("User with email %s already exists.", u.Email))
 	}
 
-	hashedPassword := make([]byte, 256)
-
-	hashedPassword, err = bcrypt.GenerateFromPassword([]byte(u.Password), 10)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 10)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -184,7 +182,15 @@ func (s *Controller) logoutPost(c *fiber.Ctx) error {
 		return err
 	}
 
+	c.Cookie(&fiber.Cookie{
+		Name:    "cart_id",
+		Value:   "",
+		Expires: time.Now(),
+	})
+
+	//nolint
 	sess.Destroy()
+	//nolint
 	defer sess.Save()
 
 	return c.SendStatus(fiber.StatusNoContent)
