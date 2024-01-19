@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -28,6 +29,8 @@ func (s *Controller) RegisterRoutes() {
 	s.Get("/hello", s.HelloWorldHandler)
 	s.Get("/health", s.healthHandler)
 
+	s.Use("/v1/*", s.CartMiddleware)
+
 	s.RegisterAuthRoutes()
 	s.RegisterUtilRoutes()
 	s.RegisterHomeRoutes()
@@ -39,7 +42,34 @@ func (s *Controller) RegisterRoutes() {
 
 	s.RegisterProfileRoutes()
 	s.RegisterAddressRoutes()
+	s.RegisterCardRoutes()
 	s.RegisterOrderAuthorisedRoutes()
+}
+
+func (s *Controller) CartMiddleware(c *fiber.Ctx) error {
+	cookie := fiber.Cookie{
+		Name:    "cart_id",
+		Expires: time.Now().Add(time.Hour * 48),
+	}
+
+	existingCartID := c.Cookies("cart_id")
+	if existingCartID != "" {
+		cookie.Value = existingCartID
+		c.Cookie(&cookie)
+
+		return c.Next()
+	}
+
+	newCart, err := s.createCart(c)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	cookie.Value = strconv.Itoa(int(newCart.ID))
+	c.Cookie(&cookie)
+
+	return c.Next()
 }
 
 func (s *Controller) UserAuthMiddleware(c *fiber.Ctx) error {
@@ -63,7 +93,17 @@ func (s *Controller) UserAuthMiddleware(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnauthorized, "User Token Expired")
 	}
 
-	sess.SetExpiry(24 * time.Hour)
+	// If user is authorized, then update the cart's user_id
+	cartIdStr := c.Cookies("cart_id")
+	cartId, _ := strconv.Atoi(cartIdStr)
+	if cartIdStr != "" && cartId > 0 {
+		s.DB.
+			Model(&user.Cart{ID: uint(cartId)}).
+			Update("user_id", u.ID)
+	}
+
+	sess.SetExpiry(72 * time.Hour)
+	//nolint
 	sess.Save()
 
 	c.Locals("user", u)
@@ -138,4 +178,38 @@ func (s *Controller) healthHandler(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(database.SqlxHealth(db))
+}
+
+func (s *Controller) createCart(c *fiber.Ctx) (*user.Cart, error) {
+	sess, err := s.Store.Get(c)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	var (
+		token = sess.ID()
+		cart  = user.Cart{}
+		u     = user.User{}
+	)
+
+	err = s.DB.
+		Where(&user.User{RememberToken: &token}).
+		First(&u).Error
+
+	if err == nil && u.ID > 0 {
+		cart.UserID = &u.ID
+	}
+
+	err = s.DB.
+		Where(&cart).
+		Order("id DESC").
+		FirstOrCreate(&cart).Error
+
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	return &cart, nil
 }
