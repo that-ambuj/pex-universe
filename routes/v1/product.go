@@ -77,7 +77,7 @@ func (s *Controller) productsGet(c *fiber.Ctx) error {
 //	@Tags		products
 //	@Produce	json
 //	@Success	200	{object}	product.Product
-//	@Param		id	query		int	true	"Product ID"
+//	@Param		id	path		int	true	"Product ID"
 func (s *Controller) productByIdGet(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
