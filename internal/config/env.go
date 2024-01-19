@@ -7,18 +7,14 @@ import (
 )
 
 func LoadEnv() {
-	err := *new(error)
 	env := os.Getenv("APP_ENV")
 
 	if env == "" {
 		env = "development"
 	}
 
+	//nolint:errcheck
 	godotenv.Load(".env." + env)
-	if err != nil {
-	}
-
+	//nolint:errcheck
 	godotenv.Load(".env")
-	if err != nil {
-	}
 }

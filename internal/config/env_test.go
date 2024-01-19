@@ -9,7 +9,11 @@ import (
 )
 
 func TestEnv(t *testing.T) {
-	os.Chdir("../..")
+	err := os.Chdir("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	config.LoadEnv()
 
 	assert.Equal(t, os.Getenv("APP_ENV"), "test")
