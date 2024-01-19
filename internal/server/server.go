@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"pex-universe/internal/database"
+	"pex-universe/internal/utils"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -109,10 +110,20 @@ func New() *FiberServer {
 		})
 	}
 
+	v := validator.New(validator.WithRequiredStructEnabled())
+	//nolint:errcheck
+	v.RegisterValidation("payment-method", utils.ValidatePaymentMethod)
+	//nolint:errcheck
+	v.RegisterValidation("month", utils.ValidateMonth)
+	//nolint:errcheck
+	v.RegisterValidation("year", utils.ValidateYear)
+	//nolint:errcheck
+	v.RegisterValidation("card-type", utils.ValidateCardType)
+
 	server := &FiberServer{
 		App:   app,
 		DB:    db,
-		V:     validator.New(),
+		V:     v,
 		Store: session.New(sessionConfig),
 	}
 
