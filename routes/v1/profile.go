@@ -16,7 +16,7 @@ func (s *Controller) RegisterProfileRoutes() {
 }
 
 type ProfileUpdateDto struct {
-	Name string `validate:"required" example:"John Doe"`
+	Name *string `example:"John Doe"`
 }
 
 // profileGet
