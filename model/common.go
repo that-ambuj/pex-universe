@@ -16,6 +16,11 @@ type PaginationDto struct {
 	Limit int
 }
 
+type EntityDeletedResponse struct {
+	RowsAffected int64
+	Message      string
+}
+
 func (p *PaginationDto) Skip() int {
 	return (p.Page - 1) * p.Limit
 }
