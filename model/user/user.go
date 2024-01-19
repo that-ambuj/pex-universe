@@ -23,6 +23,7 @@ type (
 		// Joins
 		Addresses []Address
 		Cards     []Card
+		Carts     []Cart
 	}
 
 	UserLoginDto struct {
