@@ -53,7 +53,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/cart": {
+        "/v1/cart/items": {
             "get": {
                 "description": "Get a List of Items in the ` + "`" + `Cart` + "`" + `",
                 "tags": [
@@ -95,6 +95,86 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/user.CartProduct"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/cart/items/{id}": {
+            "get": {
+                "description": "Get a Items in the ` + "`" + `Cart` + "`" + ` with given ` + "`" + `ID` + "`" + `",
+                "tags": [
+                    "cart"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Cart ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.CartProduct"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the Item with given ` + "`" + `ID` + "`" + ` from the ` + "`" + `Cart` + "`" + `",
+                "tags": [
+                    "cart"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Cart Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Cart Product Update Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.CartProductUpdateDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.EntityDeletedResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove the Item with given ` + "`" + `ID` + "`" + ` from the ` + "`" + `Cart` + "`" + `",
+                "tags": [
+                    "cart"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Cart Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.EntityDeletedResponse"
                         }
                     }
                 }
@@ -1697,7 +1777,20 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "savedForLater": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        },
+        "user.CartProductUpdateDto": {
+            "type": "object",
+            "properties": {
+                "qty": {
+                    "type": "integer"
+                },
+                "savedForLater": {
+                    "type": "boolean",
+                    "example": false
                 }
             }
         },

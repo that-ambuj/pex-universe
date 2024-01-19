@@ -658,10 +658,19 @@ definitions:
       qty:
         type: integer
       savedForLater:
+        default: false
         type: boolean
     required:
     - product_id
     - qty
+    type: object
+  user.CartProductUpdateDto:
+    properties:
+      qty:
+        type: integer
+      savedForLater:
+        example: false
+        type: boolean
     type: object
   user.Country:
     properties:
@@ -817,7 +826,7 @@ paths:
       summary: Hello World
       tags:
       - default
-  /v1/cart:
+  /v1/cart/items:
     get:
       description: Get a List of Items in the `Cart`
       responses:
@@ -845,6 +854,58 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/user.CartProduct'
+      tags:
+      - cart
+  /v1/cart/items/{id}:
+    delete:
+      description: Remove the Item with given `ID` from the `Cart`
+      parameters:
+      - description: Cart Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.EntityDeletedResponse'
+      tags:
+      - cart
+    get:
+      description: Get a Items in the `Cart` with given `ID`
+      parameters:
+      - description: Cart ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.CartProduct'
+      tags:
+      - cart
+    put:
+      description: Update the Item with given `ID` from the `Cart`
+      parameters:
+      - description: Cart Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Cart Product Update Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.CartProductUpdateDto'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.EntityDeletedResponse'
       tags:
       - cart
   /v1/categories:
