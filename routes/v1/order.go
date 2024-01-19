@@ -30,7 +30,7 @@ func (s *Controller) RegisterOrderOpenRoutes() {
 
 // cartGet
 //
-//	@Router			/v1/cart [get]
+//	@Router			/v1/cart/items [get]
 //	@Success		200	{array}	user.CartProduct
 //	@Tags			cart
 //	@Description	Get a List of Items in the `Cart`
@@ -54,7 +54,7 @@ func (s *Controller) cartGet(c *fiber.Ctx) error {
 
 // cartItemByIdGet
 //
-//	@Router			/v1/cart/{id} [get]
+//	@Router			/v1/cart/items/{id} [get]
 //	@Success		200	{object}	user.CartProduct
 //	@Tags			cart
 //	@Description	Get a Items in the `Cart` with given `ID`
@@ -89,7 +89,7 @@ func (s *Controller) cartItemByIdGet(c *fiber.Ctx) error {
 
 // cartPost
 //
-//	@Router			/v1/cart [post]
+//	@Router			/v1/cart/items [post]
 //	@Param			request	body		user.CartProductCreateDto	true	"Cart Product Data"
 //	@Success		201		{object}	user.CartProduct
 //	@Produce		json
@@ -148,7 +148,7 @@ func (s *Controller) cartPost(c *fiber.Ctx) error {
 
 // cartItemByIdDelete
 //
-//	@Router			/v1/cart/{id} [delete]
+//	@Router			/v1/cart/items/{id} [delete]
 //	@Success		200 {object} model.EntityDeletedResponse
 //	@Tags			cart
 //	@Description	Remove the Item with given `ID` from the `Cart`
@@ -188,7 +188,7 @@ func (s *Controller) cartItemByIdDelete(c *fiber.Ctx) error {
 
 // cartItemByIdPut
 //
-//	@Router			/v1/cart/{id} [put]
+//	@Router			/v1/cart/items/{id} [put]
 //	@Tags			cart
 //	@Description	Update the Item with given `ID` from the `Cart`
 //	@Param			id	path		int	true	"Cart Item ID"
