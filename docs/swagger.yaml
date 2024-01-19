@@ -1,138 +1,11 @@
 basePath: /
 definitions:
-  address.Address:
+  model.EntityDeletedResponse:
     properties:
-      city:
-        example: Tokyo
+      message:
         type: string
-      company:
-        type: string
-      country:
-        $ref: '#/definitions/address.Country'
-      createdAt:
-        type: string
-      email:
-        example: john@example.com
-        type: string
-      ext:
-        type: string
-      firstName:
-        example: John
-        type: string
-      id:
+      rowsAffected:
         type: integer
-      lastName:
-        example: Doe
-        type: string
-      phone:
-        example: "+11349503120"
-        type: string
-      state:
-        $ref: '#/definitions/address.State'
-      streetAddress1:
-        type: string
-      streetAddress2:
-        type: string
-      updatedAt:
-        type: string
-      verified:
-        type: boolean
-      zip:
-        type: string
-    type: object
-  address.AddressCreateDto:
-    properties:
-      city:
-        example: Los Angeles
-        type: string
-      company:
-        type: string
-      countryID:
-        minimum: 1
-        type: integer
-      email:
-        example: john@example.com
-        type: string
-      ext:
-        type: string
-      firstName:
-        example: John
-        type: string
-      lastName:
-        example: Doe
-        type: string
-      phone:
-        example: "+12380941034"
-        type: string
-      stateID:
-        minimum: 1
-        type: integer
-      streetAddress1:
-        type: string
-      streetAddress2:
-        type: string
-      zip:
-        type: string
-    type: object
-  address.AddressUpdateDto:
-    properties:
-      city:
-        example: New York
-        type: string
-      company:
-        type: string
-      countryId:
-        minimum: 1
-        type: integer
-      email:
-        example: john@example.com
-        type: string
-      ext:
-        type: string
-      firstName:
-        example: Jane
-        type: string
-      lastName:
-        example: Doe
-        type: string
-      phone:
-        example: "+12380941034"
-        type: string
-      stateId:
-        minimum: 1
-        type: integer
-      streetAddress1:
-        type: string
-      streetAddress2:
-        type: string
-      zip:
-        type: string
-    type: object
-  address.Country:
-    properties:
-      displayName:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      position:
-        type: integer
-      ppCode:
-        type: string
-    type: object
-  address.State:
-    properties:
-      fullName:
-        type: string
-      id:
-        type: integer
-      info:
-        type: string
-      name:
-        type: string
-      tax:
-        type: number
     type: object
   model.ErrorResponse:
     properties:
@@ -198,6 +71,29 @@ definitions:
       updatedAt:
         type: string
     type: object
+  product.Coupon:
+    properties:
+      amount:
+        type: number
+      code:
+        type: string
+      createdAt:
+        type: string
+      expire:
+        type: string
+      id:
+        type: integer
+      maxUses:
+        type: integer
+      name:
+        type: string
+      qualifyingAmount:
+        type: number
+      type:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
   product.Manufacturer:
     properties:
       createdAt:
@@ -219,6 +115,10 @@ definitions:
         type: string
       caPropWarning:
         type: boolean
+      coupons:
+        items:
+          $ref: '#/definitions/product.Coupon'
+        type: array
       createdAt:
         type: string
       crossRef:
@@ -331,6 +231,10 @@ definitions:
         type: boolean
       shipSeparately:
         type: boolean
+      shippingMethods:
+        items:
+          $ref: '#/definitions/product.ShippingMethod'
+        type: array
       showMapPrice:
         type: boolean
       slug:
@@ -440,6 +344,39 @@ definitions:
       updatedAt:
         type: string
     type: object
+  product.ShippingMethod:
+    properties:
+      active:
+        type: boolean
+      class:
+        type: string
+      createdAt:
+        type: string
+      cutoff:
+        type: integer
+      discount:
+        type: integer
+      freeShippingApplies:
+        type: boolean
+      freightDiscount:
+        type: integer
+      id:
+        type: integer
+      maxDiscount:
+        type: integer
+      method:
+        type: string
+      position:
+        type: integer
+      serviceDays:
+        type: string
+      shipDays:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   routes.AddressesResponse:
     properties:
       count:
@@ -448,7 +385,7 @@ definitions:
         type: integer
       data:
         items:
-          $ref: '#/definitions/address.Address'
+          $ref: '#/definitions/user.Address'
         type: array
       totalPages:
         type: integer
@@ -500,24 +437,323 @@ definitions:
       name:
         example: John Doe
         type: string
-    required:
-    - name
     type: object
-  user.User:
+  user.Address:
     properties:
-      addresses:
-        items:
-          $ref: '#/definitions/address.Address'
-        type: array
+      city:
+        example: Tokyo
+        type: string
+      company:
+        type: string
+      country:
+        $ref: '#/definitions/user.Country'
       createdAt:
         type: string
       email:
+        example: john@example.com
+        type: string
+      ext:
+        type: string
+      firstName:
+        example: John
+        type: string
+      id:
+        type: integer
+      lastName:
+        example: Doe
+        type: string
+      phone:
+        example: "+11349503120"
+        type: string
+      state:
+        $ref: '#/definitions/user.State'
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      updatedAt:
+        type: string
+      verified:
+        type: boolean
+      zip:
+        type: string
+    type: object
+  user.AddressCreateDto:
+    properties:
+      city:
+        example: Los Angeles
+        type: string
+      company:
+        type: string
+      countryID:
+        minimum: 1
+        type: integer
+      email:
+        example: john@example.com
+        type: string
+      ext:
+        type: string
+      firstName:
+        example: John
+        type: string
+      lastName:
+        example: Doe
+        type: string
+      phone:
+        example: "+12380941034"
+        type: string
+      stateID:
+        minimum: 1
+        type: integer
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      zip:
+        type: string
+    type: object
+  user.AddressUpdateDto:
+    properties:
+      city:
+        example: New York
+        type: string
+      company:
+        type: string
+      countryId:
+        minimum: 1
+        type: integer
+      email:
+        example: john@example.com
+        type: string
+      ext:
+        type: string
+      firstName:
+        example: Jane
+        type: string
+      lastName:
+        example: Doe
+        type: string
+      phone:
+        example: "+12380941034"
+        type: string
+      stateId:
+        minimum: 1
+        type: integer
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      zip:
+        type: string
+    type: object
+  user.Card:
+    properties:
+      cardNumber:
+        type: string
+      cardNumberLength:
+        type: integer
+      cardType:
+        type: string
+      createdAt:
+        type: string
+      expMonth:
+        type: string
+      expYear:
+        type: string
+      id:
+        type: integer
+      paymentMethod:
+        allOf:
+        - $ref: '#/definitions/user.PaymentMethod'
+        description: Joins
+      transaction_id:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  user.CardCreateDto:
+    properties:
+      cardNumber:
+        example: "4242424242424242"
+        type: string
+      cardType:
+        $ref: '#/definitions/user.CardType'
+      expMonth:
+        example: "06"
+        type: string
+      expYear:
+        example: "2026"
+        type: string
+      paymentMethod:
+        $ref: '#/definitions/user.PaymentMethodName'
+      transaction_id:
+        type: string
+    type: object
+  user.CardType:
+    enum:
+    - American Express
+    - Visa
+    - Mastercard
+    - Discover
+    type: string
+    x-enum-varnames:
+    - Amex
+    - Visa
+    - MasterCard
+    - Discover
+  user.Cart:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/user.CartProduct'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  user.CartProduct:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      manufacturer:
+        type: string
+      mqty:
+        type: integer
+      mqty_id:
+        description: What are these three?
+        type: integer
+      mqtyLabel:
+        type: string
+      partNumber:
+        type: string
+      price:
+        type: number
+      product_id:
+        type: integer
+      qty:
+        type: integer
+      savedForLater:
+        type: boolean
+      startingPrice:
+        description: What is this?
+        type: number
+      title:
+        type: string
+      updatedAt:
+        type: string
+      weight:
+        type: number
+      weightUnits:
+        type: string
+    type: object
+  user.CartProductCreateDto:
+    properties:
+      product_id:
+        type: integer
+      qty:
+        type: integer
+      savedForLater:
+        type: boolean
+    required:
+    - product_id
+    - qty
+    type: object
+  user.Country:
+    properties:
+      displayName:
         type: string
       id:
         type: integer
       name:
         type: string
+      position:
+        type: integer
+      ppCode:
+        type: string
+    type: object
+  user.PaymentMethod:
+    properties:
+      createdAt:
+        type: string
+      displayName:
+        type: string
+      locked:
+        type: boolean
+      method:
+        type: string
+      name:
+        type: string
+      position:
+        type: integer
+      provider:
+        type: string
       updatedAt:
+        type: string
+    type: object
+  user.PaymentMethodName:
+    enum:
+    - PAYPAL_CREDIT
+    - PAYPAL_EXPRESS
+    - STRIPE_CREDIT
+    type: string
+    x-enum-varnames:
+    - PaypalCreditCard
+    - PaypalExpress
+    - StripeCreditCard
+  user.State:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+      info:
+        type: string
+      name:
+        type: string
+      tax:
+        type: number
+    type: object
+  user.User:
+    properties:
+      addresses:
+        description: Joins
+        items:
+          $ref: '#/definitions/user.Address'
+        type: array
+      cards:
+        items:
+          $ref: '#/definitions/user.Card'
+        type: array
+      carts:
+        items:
+          $ref: '#/definitions/user.Cart'
+        type: array
+      createdAt:
+        type: string
+      customer_id:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      lastLockoutAt:
+        type: string
+      lastLoggedIn:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      passwordResetAt:
+        type: string
+      updatedAt:
+        type: string
+      username:
         type: string
     type: object
   user.UserLoginDto:
@@ -526,7 +762,7 @@ definitions:
         example: john@example.com
         type: string
       password:
-        example: Very Strong Password
+        example: avEryStrongPass@93
         minLength: 8
         type: string
     required:
@@ -545,10 +781,12 @@ definitions:
         example: avEryStrongPass@93
         minLength: 8
         type: string
+      username:
+        type: string
     required:
     - email
-    - name
     - password
+    - username
     type: object
 info:
   contact: {}
@@ -579,6 +817,36 @@ paths:
       summary: Hello World
       tags:
       - default
+  /v1/cart:
+    get:
+      description: Get a List of Items in the `Cart`
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.CartProduct'
+            type: array
+      tags:
+      - cart
+    post:
+      description: Add a new Item to the cart
+      parameters:
+      - description: Cart Product Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.CartProductCreateDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.CartProduct'
+      tags:
+      - cart
   /v1/categories:
     get:
       description: Get List of `Categories`
@@ -650,7 +918,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/address.Country'
+              $ref: '#/definitions/user.Country'
             type: array
       tags:
       - utility
@@ -721,7 +989,7 @@ paths:
     get:
       parameters:
       - description: Product ID
-        in: query
+        in: path
         name: id
         required: true
         type: integer
@@ -784,11 +1052,9 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/routes.AddressesResponse'
-            type: array
+            $ref: '#/definitions/routes.AddressesResponse'
       tags:
-      - profile
+      - addresses
     post:
       description: Create a new `Address` for the current `User`
       parameters:
@@ -797,20 +1063,20 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/address.AddressCreateDto'
+          $ref: '#/definitions/user.AddressCreateDto'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/address.Address'
+            $ref: '#/definitions/user.Address'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       tags:
-      - profile
+      - addresses
   /v1/profile/addresses/{id}:
     delete:
       description: Get `Address` Info By ID
@@ -826,9 +1092,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/address.Address'
+            $ref: '#/definitions/model.EntityDeletedResponse'
       tags:
-      - profile
+      - addresses
     get:
       description: Get `Address` Info By ID
       parameters:
@@ -843,9 +1109,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/address.Address'
+            $ref: '#/definitions/user.Address'
       tags:
-      - profile
+      - addresses
     put:
       description: Update an `Address` by it's `ID`.
       parameters:
@@ -859,16 +1125,83 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/address.AddressUpdateDto'
+          $ref: '#/definitions/user.AddressUpdateDto'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/address.Address'
+            $ref: '#/definitions/user.Address'
       tags:
-      - profile
+      - addresses
+  /v1/profile/cards:
+    get:
+      description: Get a List of Saved `Card`s by the current `User`
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.Card'
+            type: array
+      tags:
+      - cards
+    post:
+      description: Create a new Credit/Debit Card for User
+      parameters:
+      - description: Card Create Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.CardCreateDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.Card'
+      tags:
+      - cards
+  /v1/profile/cards/{id}:
+    delete:
+      description: Delete a Card by ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.EntityDeletedResponse'
+      tags:
+      - cards
+    get:
+      description: Get a List of Saved `Card`s by the current `User`
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.Card'
+      tags:
+      - cards
   /v1/signup:
     post:
       consumes:
@@ -899,7 +1232,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/address.State'
+              $ref: '#/definitions/user.State'
             type: array
       tags:
       - utility
