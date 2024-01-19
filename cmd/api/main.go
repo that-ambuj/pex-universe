@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"pex-universe/internal/server"
-	"pex-universe/routes/v1"
+	routes "pex-universe/routes/v1"
 	"strconv"
 
 	_ "github.com/joho/godotenv/autoload"
