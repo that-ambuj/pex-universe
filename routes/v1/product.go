@@ -79,6 +79,7 @@ func (s *Controller) productsGet(c *fiber.Ctx) error {
 //	@Success	200	{object}	product.Product
 //	@Param		id	path		int	true	"Product ID"
 func (s *Controller) productByIdGet(c *fiber.Ctx) error {
+	// TODO: return isInsideCart
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return err

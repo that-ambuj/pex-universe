@@ -16,6 +16,7 @@ func (Cart) TableName() string {
 	return "cart"
 }
 
+// TODO: add image
 type CartProduct struct {
 	ID            uint `json:"id"`
 	CartID        uint `json:"-"`
@@ -40,10 +41,10 @@ type CartProduct struct {
 type CartProductCreateDto struct {
 	ProductID     int  `validate:"required" json:"product_id"`
 	Qty           int  `validate:"required"`
-	SavedForLater bool `validate:"omitempty"`
+	SavedForLater bool `validate:"omitempty" default:"false"`
 }
 
 type CartProductUpdateDto struct {
 	Qty           int  `validate:"omitempty"`
-	SavedForLater bool `validate:"omitempty"`
+	SavedForLater bool `validate:"omitempty" example:"false"`
 }
