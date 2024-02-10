@@ -28,10 +28,14 @@ func (s *Controller) RegisterOrderOpenRoutes() {
 		Put("/cart/items/:id", s.cartItemByIdPut)
 }
 
+type CartItemsResp struct {
+	Data []user.CartProduct
+}
+
 // cartGet
 //
 //	@Router			/v1/cart/items [get]
-//	@Success		200	{array}	user.CartProduct
+//	@Success		200	{object}	CartItemsResp
 //	@Tags			cart
 //	@Description	Get a List of Items in the `Cart`
 func (s *Controller) cartGet(c *fiber.Ctx) error {
@@ -49,7 +53,9 @@ func (s *Controller) cartGet(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(&items)
+	return c.JSON(&CartItemsResp{
+		Data: items,
+	})
 }
 
 // cartItemByIdGet
