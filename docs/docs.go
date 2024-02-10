@@ -63,10 +63,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/user.CartProduct"
-                            }
+                            "$ref": "#/definitions/routes.CartItemsResp"
                         }
                     }
                 }
@@ -1376,6 +1373,17 @@ const docTemplate = `{
                 },
                 "totalPages": {
                     "type": "integer"
+                }
+            }
+        },
+        "routes.CartItemsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.CartProduct"
+                    }
                 }
             }
         },

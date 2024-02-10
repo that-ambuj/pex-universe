@@ -390,6 +390,13 @@ definitions:
       totalPages:
         type: integer
     type: object
+  routes.CartItemsResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/user.CartProduct'
+        type: array
+    type: object
   routes.CategoriesResp:
     properties:
       count:
@@ -833,9 +840,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/user.CartProduct'
-            type: array
+            $ref: '#/definitions/routes.CartItemsResp'
       tags:
       - cart
     post:
