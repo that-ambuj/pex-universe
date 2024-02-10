@@ -47,6 +47,7 @@ func (s *Controller) productsGet(c *fiber.Ctx) error {
 
 	assoc := s.DB.
 		Model(&product.Category{ID: uint(categoryId)}).
+		Preload("Images").
 		Limit(limit).
 		Offset((page - 1) * limit).
 		Association("Products")
