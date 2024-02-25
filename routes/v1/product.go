@@ -31,29 +31,57 @@ type ProductsResp struct {
 //	@Tags		products
 //	@Produce	json
 //	@Success	200			{object}	ProductsResp
-//	@Param		category_id	query		int	false	"Category ID"
-//	@Param		page		query		int	false	"page number"		default(1)
-//	@Param		limit		query		int	false	"limit of results"	default(10)
+//	@Param		search		query		string	false	"Search Query"
+//	@Param		category_id	query		int		false	"Category ID"
+//	@Param		page		query		int		false	"page number"		default(1)
+//	@Param		limit		query		int		false	"limit of results"	default(10)
 func (s *Controller) productsGet(c *fiber.Ctx) error {
-	categoryId := c.QueryInt("category_id")
-	if categoryId < 1 {
-		return fiber.NewError(400, "Please set category_id correctly")
-	}
-
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
 
 	products := []product.Product{}
 
-	assoc := s.DB.
-		Model(&product.Category{ID: uint(categoryId)}).
-		Preload("Images").
-		Limit(limit).
-		Offset((page - 1) * limit).
-		Association("Products")
+	categoryId := c.QueryInt("category_id")
+	search := c.Query("search")
 
-	count := assoc.Count()
-	err := assoc.Find(&products)
+	var (
+		err   error
+		count int64
+		query *gorm.DB
+	)
+
+	if categoryId > 0 {
+		query = s.DB.Model(&product.Category{
+			ID: uint(categoryId),
+		})
+	} else {
+		query = s.DB.Model(&product.Product{})
+	}
+
+	query = query.Preload("Images").
+		Limit(limit).
+		Offset((page - 1) * limit)
+
+	if search != "" {
+		query = query.Where(`meta_title LIKE ? 
+			OR meta_description LIKE ?
+			OR part_number = ?`,
+			fmt.Sprintf("%%%s%%", search),
+			fmt.Sprintf("%%%s%%", search),
+			search,
+		)
+	}
+
+	if categoryId > 0 {
+		assoc := query.Association("Products")
+
+		count = assoc.Count()
+		err = assoc.Find(&products)
+	} else {
+		err = query.
+			Count(&count).
+			Find(&products).Error
+	}
 
 	if err != nil {
 		log.Error(err)
