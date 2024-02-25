@@ -64,7 +64,7 @@ func (s *Controller) cartGet(c *fiber.Ctx) error {
 //	@Success		200	{object}	user.CartProduct
 //	@Tags			cart
 //	@Description	Get a Items in the `Cart` with given `ID`
-//	@Param			id	path		int	true	"Cart ID"
+//	@Param			id	path	int	true	"Cart ID"
 func (s *Controller) cartItemByIdGet(c *fiber.Ctx) error {
 	cartId, _ := strconv.Atoi(c.Cookies("cart_id"))
 
@@ -155,10 +155,10 @@ func (s *Controller) cartPost(c *fiber.Ctx) error {
 // cartItemByIdDelete
 //
 //	@Router			/v1/cart/items/{id} [delete]
-//	@Success		200 {object} model.EntityDeletedResponse
+//	@Success		200	{object}	model.EntityDeletedResponse
 //	@Tags			cart
 //	@Description	Remove the Item with given `ID` from the `Cart`
-//	@Param			id	path		int	true	"Cart Item ID"
+//	@Param			id	path	int	true	"Cart Item ID"
 func (s *Controller) cartItemByIdDelete(c *fiber.Ctx) error {
 	cartId, _ := strconv.Atoi(c.Cookies("cart_id"))
 
@@ -197,9 +197,9 @@ func (s *Controller) cartItemByIdDelete(c *fiber.Ctx) error {
 //	@Router			/v1/cart/items/{id} [put]
 //	@Tags			cart
 //	@Description	Update the Item with given `ID` from the `Cart`
-//	@Param			id	path		int	true	"Cart Item ID"
+//	@Param			id		path		int							true	"Cart Item ID"
 //	@Param			request	body		user.CartProductUpdateDto	true	"Cart Product Update Data"
-//	@Success		200 {object} model.EntityDeletedResponse
+//	@Success		200		{object}	model.EntityDeletedResponse
 func (s *Controller) cartItemByIdPut(c *fiber.Ctx) error {
 	cartId, _ := strconv.Atoi(c.Cookies("cart_id"))
 
