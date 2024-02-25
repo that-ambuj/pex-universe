@@ -1028,6 +1028,10 @@ paths:
   /v1/products:
     get:
       parameters:
+      - description: Search Query
+        in: query
+        name: search
+        type: string
       - description: Category ID
         in: query
         name: category_id
