@@ -1,8 +1,6 @@
 package server
 
 import (
-	"fmt"
-	"os"
 	"pex-universe/internal/database"
 	"pex-universe/internal/utils"
 	"time"
@@ -76,9 +74,10 @@ func New() *FiberServer {
 	sessionConfig.Storage = storage
 
 	app := fiber.New(fiber.Config{
-		ErrorHandler: ErrorHandler,
-		JSONEncoder:  json.MarshalSnakeCase,
-		JSONDecoder:  json.UnmarshalSnakeCase,
+		EnablePrintRoutes: true,
+		ErrorHandler:      ErrorHandler,
+		JSONEncoder:       json.MarshalSnakeCase,
+		JSONDecoder:       json.UnmarshalSnakeCase,
 	})
 
 	app.Use(fiberLogger.New())
@@ -96,19 +95,7 @@ func New() *FiberServer {
 
 	app.Get("/metrics", monitor.New())
 
-	env := os.Getenv("APP_ENV")
-
 	db := database.New()
-
-	if env != "test" {
-		app.Hooks().OnRoute(func(r fiber.Route) error {
-			if r.Method != "HEAD" && r.Path != "/v1/*" {
-				fmt.Printf("Mapped Route: [%s] %s\n", r.Method, r.Path)
-			}
-
-			return nil
-		})
-	}
 
 	v := validator.New(validator.WithRequiredStructEnabled())
 	//nolint:errcheck
